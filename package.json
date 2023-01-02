@@ -1,0 +1,28 @@
+{
+  "name": "zyd-server-framework2",
+  "version": "1.0.3",
+  "description": "基于nodejs,koa的server端框架，使用装饰器构建",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon --exec babel-node main.js"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "koa"
+  ],
+  "author": "zhangzheng",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.7",
+    "@babel/node": "^7.20.7",
+    "@babel/plugin-proposal-decorators": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
+    "koa": "^2.14.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^12.0.0",
+    "mongoose": "^6.8.2",
+    "node-schedule": "^2.1.0"
+  }
+}

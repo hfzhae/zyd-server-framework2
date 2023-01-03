@@ -44,8 +44,8 @@ $ npm install -s zyd-server-framework2
 ```
 >/index.js
 ```js
-import { Zyd } from "zyd-server-framework2"
-const app = new Zyd() 
+import { Zsf } from "zyd-server-framework2"
+const app = new Zsf() 
 app.start()
 ```
 ```
@@ -74,8 +74,8 @@ start on port:3000
 ## Options
 >/index.js
 ```js
-import { Zyd } from "zyd-server-framework2"
-const app = new Zyd({ 
+import { Zsf } from "zyd-server-framework2"
+const app = new Zsf({ 
   baseUrl: "/api", // 基础路径设置
   beforeInit(koaApp){ // 生命周期函数 - 初始化前
     koaApp.use(require("koa2-cors")()) // 跨域设置

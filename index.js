@@ -23,7 +23,7 @@ const { resolve } = require("path")
 const Init = require("./init")
 const Koa = require("koa")
 const version = require('./package.json').version
-class Zyd {
+class Zsf {
   constructor() {
     const dir = __dirname.split("/node_modules/zyd-server-framework2")[0]
     new Init(dir)
@@ -54,7 +54,7 @@ version：${version}
   }
 }
 module.exports = {
-  Zyd,
+  Zsf,
   Injectable,
   Get,
   Post,

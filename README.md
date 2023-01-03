@@ -48,6 +48,29 @@ import { Zyd } from "zyd-server-framework2"
 const app = new Zyd() 
 app.start()
 ```
+```
+┌───────────────────────┐
+│ Powered by zydsoft®   │
+│ zyd-server-framework2 │
+└───────────────────────┘
+version：1.0.x
+
+正在加载数据库：{db:Mongo,class:Users}
+正在加载模型：Users
+正在加载数据库：{db:Mongo,class:Users}
+正在加载中间件：error
+正在加载数据库：{db:Mongo,class:Users}
+正在启动定时器: handler
+正在加载模型：Users
+正在加载数据库：{db:Mongo,class:Users}
+正在映射地址：post /api/Users/add
+正在映射地址：get /api/Users/get
+start on port:3000
+
+┌───────────────┐
+│ start success │
+└───────────────┘
+```
 ## Options
 >/index.js
 ```js

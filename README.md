@@ -74,8 +74,8 @@ start on port:3000
 ## Options
 >/index.js
 ```js
-import { Zsf } from "zyd-server-framework2"
-const app = new Zsf({ 
+import { Zyd } from "zyd-server-framework2"
+const app = new Zyd({ 
   baseUrl: "/api", // 基础路径设置
   beforeInit(koaApp){ // 生命周期函数 - 初始化前
     koaApp.use(require("koa2-cors")()) // 跨域设置

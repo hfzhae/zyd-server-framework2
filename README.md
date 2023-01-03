@@ -12,6 +12,44 @@
 $ npm install -s zyd-server-framework2
 ```
 ## Quickstart
+>/.babelrc
+```json
+{
+  "presets": [
+    "@babel/preset-env"
+  ],
+  "plugins": [
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "legacy": true
+      }
+    ]
+  ]
+}
+```
+>/jsconfig.json
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true
+  }
+}
+```
+>/package.json
+```json
+{
+  "name": "myApp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon --exec babel-node index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
+```
 >/index.js
 ```js
 import { Zsf } from "zyd-server-framework2"

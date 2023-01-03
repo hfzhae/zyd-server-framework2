@@ -47,7 +47,7 @@ module.exports = class Init {
     `)
   }
   createExamplesAuthenticatorFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/authenticator"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -69,7 +69,7 @@ export default class AuthToken {
     `)
   }
   createExamplesConfigFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/config"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -84,7 +84,7 @@ export default class AuthToken {
     `)
   }
   createExamplesControllerFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/controller"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -116,7 +116,7 @@ class Users {
     `)
   }
   createExamplesDataBaseFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/dataBase"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -173,7 +173,7 @@ module.exports = class Mongo {
     `)
   }
   createExamplesMiddlewareFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/middleware"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -203,7 +203,7 @@ class Middlewares {
     `)
   }
   createExamplesModelFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/model"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -235,7 +235,7 @@ export default Users
     `)
   }
   createExamplesScheduleFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/schedule"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -252,7 +252,7 @@ class Index {
     `)
   }
   createExamplesServiceFile (dir) {
-    if (fs.existsSync(dir + "/.babelrc")) return
+    if (fs.existsSync(dir + "/jsconfig.json")) return
     dir += "/service"
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)

@@ -324,11 +324,12 @@ class Users {
         { name: "张三", age: 25 },
         { session }
       )
-      await this.models.Users.prod.findByIdAndUpdate(
+      result.push(await this.models.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
-      )
+      ))
+      assert(result[1], 401, "写库失败，数据回滚")
       await session.commitTransaction()
       return result
     } catch (err) {

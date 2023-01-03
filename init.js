@@ -92,9 +92,9 @@ export default class AuthToken {
     dir += "/users.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import { Post, Get, Service, Controller, Auth, Config } from "zyd-server-framework2"
-    import UsersService from "../service/users"
-    import AuthToken from "../authenticator/authToken"
-    import ConfigIndex from "../config/index"
+import UsersService from "../service/users"
+import AuthToken from "../authenticator/authToken"
+import ConfigIndex from "../config/index"
     
 @Service([UsersService])
 @Controller("api") // prefix
@@ -270,17 +270,18 @@ class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
     const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
-    let result
+    let result = []
     try {
-      result = await this.models.Users.prod.create(
+      result.push(await this.models.Users.prod.create(
         [{ name: "张三", age: 25 }],
         { session }
-      )
-      await this.models.Users.prod.findByIdAndUpdate(
+      ))
+      result.push(await this.models.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
-      )
+      ))
+      assert(result[1], 401, "写库失败，数据回滚")
       await session.commitTransaction()
       return result
     } catch (err) {

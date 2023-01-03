@@ -131,7 +131,7 @@ class Users {
       // useFindAndModify: false,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      dbName: "acuherbCloud"
+      dbName: "prodDb"
     })
     this.prod.on("connected", () => {
       // console.log('mongodb connect prod success')
@@ -147,7 +147,7 @@ class Users {
       // useFindAndModify: false,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      dbName: "acuherbCloudTest"
+      dbName: "testDb"
     })
     this.test.on("connected", () => {
       // console.log('mongodb connect test success')

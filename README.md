@@ -11,7 +11,6 @@
 ```
 $ npm install -s zyd-server-framework2
 ```
-
 ## Quickstart
 >/index.js
 ```js
@@ -45,7 +44,6 @@ app.start(3000, callBack(){
   console.log("start on port：3000")
 })
 ```
-
 ## Class decorators
 name|params|desc
 -|-|-
@@ -54,7 +52,6 @@ Model|models|定义数据库模型对象，models(Array[Class]):数据库模型�
 Config|configs|定义配置对象，configs(Array[Class]):配置对象
 Middleware|mids|定义中间件对象，mids(Array[Class]):中间件对象
 DataBase|dbs|定义数据库对象，dbs(Array[Class]):数据库配置对象
-
 ## Function decorators
 name|params|desc
 -|-|-
@@ -65,7 +62,6 @@ Post|url|定义Post方法路由，url(String)后置路径
 Patch|url|定义Patch方法路由，url(String)后置路径
 Auth|auth|定义路由认证对象，auth(Class)认证对象
 Schedule|interval|定义定时器对象，interval(String)定时器规则，crontab格式
-
 ## authenticator
 >/authenticator/authToken.js
 ```js

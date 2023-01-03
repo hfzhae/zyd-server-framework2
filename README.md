@@ -52,8 +52,8 @@ $ npm install -s zyd-server-framework2
 ```
 >/index.js
 ```js
-import { Zsf } from "zyd-server-framework2"
-const app = new Zsf() 
+import { Zyd } from "zyd-server-framework2"
+const app = new Zyd() 
 app.start()
 ```
 ## Options

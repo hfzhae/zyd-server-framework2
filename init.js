@@ -80,12 +80,11 @@ module.exports = class AuthToken {
     dir += "/index.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `
-class Index {
+module.exports = class Index {
   constructor() {
     this.path = "/"
   }
 }
-module.exports = Index
     `)
   }
   createExamplesControllerFile (dir) {
@@ -97,18 +96,18 @@ module.exports = Index
     dir += "/users.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `
-const { Post, Get, Service, Controller, Auth, Config, Model } = require("zyd-server-framework2")
+const { Post, Get, Service, Controller, Auth, Config } = require("zyd-server-framework2")
 const UsersService = require("../service/users")
 const AuthToken = require("../authenticator/authToken")
-const configIndex = require("../config/index")
+const ConfigIndex = require("../config/index")
 
 @Service([UsersService])
 @Controller("api") // prefix
-@Config([configIndex])
+@Config([ConfigIndex])
 class Users {
   @Post()
   add (ctx) {
-    return { a: 1, ...ctx.request.body }
+    return { success: true, ...ctx.request.body }
   }
   @Get()
   @Auth(AuthToken)
@@ -169,11 +168,11 @@ module.exports = class Mongo {
   async mongoSession (dataBase) {
     const session = await dataBase.startSession({
       readPreference: { mode: 'primary' }, //只从主节点读取，默认值。
-    });
+    })
     await session.startTransaction({
       readConcern: { level: 'majority' }, //读取在大多数节点上提交完成的数据。level:"snapshot"读取最近快照中的数据。
       writeConcern: { w: 'majority' }, //大多数节点成功原则，例如一个复制集 3 个节点，2 个节点成功就认为本次写入成功。 w:"all"所以节点都成功，才认为写入成功，效率较低。
-    });
+    })
     return session
   }
 }
@@ -284,7 +283,7 @@ class Users {
     let result
     try {
       result = await this.models.Users.prod.create(
-        { name: "张三", age: 25 },
+        [{ name: "张三", age: 25 }],
         { session }
       )
       await this.models.Users.prod.findByIdAndUpdate(

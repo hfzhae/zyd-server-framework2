@@ -49,6 +49,8 @@ const app = new Zsf()
 app.start()
 ```
 ```
+$ npm run serve
+
 ┌───────────────────────┐
 │ Powered by zydsoft®   │
 │ zyd-server-framework2 │

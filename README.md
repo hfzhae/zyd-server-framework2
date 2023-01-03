@@ -14,14 +14,14 @@ $ npm install -s zyd-server-framework2
 ## Quickstart
 >/index.js
 ```js
-const { Zsf } = require("zyd-server-framework2")
+import { Zsf } from "zyd-server-framework2"
 const app = new Zsf() 
 app.start()
 ```
 ## Options
 >/index.js
 ```js
-const { Zsf } = require("zyd-server-framework2")
+import { Zsf } from "zyd-server-framework2"
 const app = new Zsf({ 
   baseUrl: "/api", // 基础路径设置
   beforeInit(koaApp){ // 生命周期函数 - 初始化前
@@ -65,8 +65,8 @@ Schedule|interval|定义定时器对象，interval(String)定时器规则，cron
 ## authenticator
 >/authenticator/authToken.js
 ```js
-const assert = require("http-assert")
-module.exports = class AuthToken {
+import assert from "http-assert"
+export default class AuthToken {
   constructor(ctx) {
     this.auth(ctx)
   }
@@ -80,8 +80,8 @@ module.exports = class AuthToken {
 ```
 >/controller/users.js
 ```js
-const { Get } = require("zyd-server-framework2")
-const AuthToken = require("../authenticator/authToken")
+import { Get } from "zyd-server-framework2"
+import AuthToken from "../authenticator/authToken"
 class Users {
   @Get()
   @Auth(AuthToken)
@@ -93,7 +93,7 @@ class Users {
 ## config
 >/config/conf.js
 ```js
-module.exports = class Global {
+export default class Global {
   constructor() {
     this.path = "/"
   }
@@ -101,8 +101,8 @@ module.exports = class Global {
 ```
 >/controller/users.js
 ```js
-const { Get, Config } = require("zyd-server-framework2")
-const Global = require("../config/index")
+import { Get, Config } from "zyd-server-framework2"
+import Global from "../config/index"
 @Config([Global])
 class Users {
   @Get()
@@ -115,10 +115,10 @@ class Users {
 ## controller
 >/controller/users.js
 ```js
-const { Post, Get, Service, Controller, Auth, Config, Model } = require("zyd-server-framework2")
-const UsersService = require("../service/users")
-const AuthToken = require("../authenticator/authToken")
-const Global = require("../config/index")
+import { Post, Get, Service, Controller, Auth, Config, Model } from "zyd-server-framework2"
+import UsersService from "../service/users"
+import AuthToken from "../authenticator/authToken"
+import Global from "../config/index"
 
 @Service([UsersService])
 @Controller("api") // prefix
@@ -143,9 +143,9 @@ class Users {
 ## dataBase
 >/dataBase/mongo.js
 ```js
-module.exports = class Mongo {
+import mongoose from "mongoose"
+export default class Mongo {
   constructor() {
-    const mongoose = require("mongoose")
     this.prod = mongoose.createConnection(`mongodb://127.0.0.1:27017?replicaSet=rs0`, {
       // useCreateIndex: true,
       // useFindAndModify: false,
@@ -194,7 +194,9 @@ module.exports = class Mongo {
 ## middleware
 >/middleware/middleware.js
 ```js
-const { Middleware } = require("zyd-server-framework2")
+import { Middleware } from "zyd-server-framework2"
+import static from "koa-static"
+import mount from "koa-mount"
 @Middleware([
   "error",
   "favicon",
@@ -223,8 +225,6 @@ class Middlewares {
     await next()
   }
   homePage (ctx, next) {
-    const static = require("koa-static")
-    const mount = require('koa-mount')
     return mount('/homePage', static('./homePage'))
   }
 }
@@ -232,10 +232,9 @@ class Middlewares {
 ## model
 >/model/users.js
 ```js
-const mongoose = require("mongoose")
-const { DataBase } = require("zyd-server-framework2")
-const Mongo = require("../dataBase/mongo")
-
+import mongoose from "mongoose"
+import { DataBase } from "zyd-server-framework2"
+import Mongo from "../dataBase/mongo"
 @DataBase([Mongo])
 class Users {
   constructor() {
@@ -253,13 +252,13 @@ class Users {
     this.test = this.dbs.Mongo.test.model("users", schema, "users")
   }
 }
-module.exports = Users
+export default Users
 ```
 ## schedule
 >/schedule/index.js
 
 ```js
-const { Schedule } = require("zyd-server-framework2")
+import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("* * 1 * * *") //crontab格式
   printLog () {
@@ -270,10 +269,10 @@ class Index {
 ## service
 >/service/users.js
 ```js
-const { Model, DataBase } = require("zyd-server-framework2")
-const ModelUsers = require("../model/Users")
-const Mongo = require("../dataBase/mongo")
-const assert = require("http-assert")
+import { Model, DataBase } from "zyd-server-framework2"
+import ModelUsers from "../model/Users"
+import Mongo from "../dataBase/mongo"
+import assert from "http-assert"
 
 @DataBase([Mongo])
 @Model([ModelUsers])
@@ -302,7 +301,7 @@ class Users {
     }
   }
 }
-module.exports = Users
+export default Users
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

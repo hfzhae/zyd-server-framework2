@@ -54,15 +54,15 @@ module.exports = class Init {
     }
     dir += "/authToken.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const assert = require("http-assert")
-module.exports = class AuthToken {
+    fs.writeFileSync(dir, `import assert from "http-assert"
+export default class AuthToken {
   constructor(ctx) {
     this.auth(ctx)
   }
   auth (ctx) {
     this.sign(ctx)
     ctx.state.partnerId = "xxxxxx"
-    // assert(false, 402, "error")
+    assert(false, 402, "error")
   }
   sign (ctx) { }
 }    
@@ -76,7 +76,7 @@ module.exports = class AuthToken {
     }
     dir += "/index.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `module.exports = class Index {
+    fs.writeFileSync(dir, `export default class Index {
   constructor() {
     this.path = "/"
   }
@@ -91,11 +91,11 @@ module.exports = class AuthToken {
     }
     dir += "/users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const { Post, Get, Service, Controller, Auth, Config } = require("zyd-server-framework2")
-const UsersService = require("../service/users")
-const AuthToken = require("../authenticator/authToken")
-const ConfigIndex = require("../config/index")
-
+    fs.writeFileSync(dir, `import { Post, Get, Service, Controller, Auth, Config } from "zyd-server-framework2"
+    import UsersService from "../service/users"
+    import AuthToken from "../authenticator/authToken"
+    import ConfigIndex from "../config/index"
+    
 @Service([UsersService])
 @Controller("api") // prefix
 @Config([ConfigIndex])
@@ -123,9 +123,9 @@ class Users {
     }
     dir += "/mongo.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `module.exports = class Mongo {
+    fs.writeFileSync(dir, `import mongoose from "mongoose"
+module.exports = class Mongo {
   constructor() {
-    const mongoose = require("mongoose")
     this.prod = mongoose.createConnection(\`mongodb://127.0.0.1:27017?replicaSet=rs0\`, {
       // useCreateIndex: true,
       // useFindAndModify: false,
@@ -180,7 +180,7 @@ class Users {
     }
     dir += "/middleware.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const { Middleware } = require("zyd-server-framework2")
+    fs.writeFileSync(dir, `import { Middleware } from "zyd-server-framework2"
 @Middleware([
   "error",
 ])
@@ -210,9 +210,9 @@ class Middlewares {
     }
     dir += "/users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const mongoose = require("mongoose")
-const { DataBase } = require("zyd-server-framework2")
-const Mongo = require("../dataBase/mongo")
+    fs.writeFileSync(dir, `import mongoose from "mongoose"
+import { DataBase } from "zyd-server-framework2"
+import Mongo from "../dataBase/mongo"
 
 @DataBase([Mongo])
 class Users {
@@ -231,7 +231,7 @@ class Users {
     this.test = this.dbs.Mongo.test.model("users", schema, "users")
   }
 }
-module.exports = Users
+export default Users
     `)
   }
   createExamplesScheduleFile (dir) {
@@ -242,7 +242,7 @@ module.exports = Users
     }
     dir += "/index.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const { Schedule } = require("zyd-server-framework2")
+    fs.writeFileSync(dir, `import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("* * 1 * * *") //crontab格式
   handler () {
@@ -259,10 +259,10 @@ class Index {
     }
     dir += "/Users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `const { Model, DataBase } = require("zyd-server-framework2")
-const ModelUsers = require("../model/Users")
-const Mongo = require("../dataBase/mongo")
-const assert = require("http-assert")
+    fs.writeFileSync(dir, `import { Model, DataBase } from "zyd-server-framework2"
+import ModelUsers from "../model/Users"
+import Mongo from "../dataBase/mongo"
+import assert from "http-assert"
 
 @DataBase([Mongo])
 @Model([ModelUsers])
@@ -291,7 +291,7 @@ class Users {
     }
   }
 }
-module.exports = Users
+export default Users
     `)
   }
 }

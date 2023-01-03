@@ -28,14 +28,6 @@ $ npm install -s zyd-server-framework2
   ]
 }
 ```
->/jsconfig.json
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true
-  }
-}
-```
 >/package.json
 ```json
 {

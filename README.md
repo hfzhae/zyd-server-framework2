@@ -248,7 +248,7 @@ export default class Mongo {
   }
 }
 ```
->/dataBase/mongo.js
+>/dataBase/mssql.js
 ```js
 import sql from "mssql"
 export default class Mssql {

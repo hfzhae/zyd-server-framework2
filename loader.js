@@ -8,7 +8,7 @@ const router = new Router()
 let baseUrl = ""
 const decorate = ({ method, url = "", router }) => {
   return (target, property, descriptor) => {
-    // process.nextTick(() => {
+    process.nextTick(() => {
       const mids = []
       // const obj = new target.constructor()
       mids.push(async ctx => { ctx.body = await target[property](ctx) })
@@ -20,7 +20,7 @@ const decorate = ({ method, url = "", router }) => {
       url = baseUrl + url // 添加基础路径
       console.log(`正在映射地址：${method} ${url}`)
       router[method](url, ...mids)
-    // })
+    })
   }
 }
 const method = method => (url) => decorate({ method, url, router })

@@ -42,7 +42,9 @@ version：${version}
     middlewares.forEach(m => { this.$app.use(m) })
     this.$app.use(router.routes())
     //生命周期函数 - init后 zz 2023-1-4
-    if (conf && conf.afterInit) conf.afterInit(this.$app)
+    process.nextTick(() => {
+      if (conf && conf.afterInit) conf.afterInit(this.$app)
+    })
   }
   start (port = 3000, callBack = () => {
     console.log("start on port:" + port)

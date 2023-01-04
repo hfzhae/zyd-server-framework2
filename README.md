@@ -36,7 +36,8 @@ $ npm install -s zyd-server-framework2
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --exec babel-node index.js"
+    "serve": "nodemon --exec babel-node index.js",
+    "prod": "babel-node index.js"
   },
   "author": "",
   "license": "ISC"

@@ -257,10 +257,10 @@ class Index {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }
-    dir += "/Users.js"
+    dir += "/users.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import { Model, DataBase } from "zyd-server-framework2"
-import ModelUsers from "../model/Users"
+import ModelUsers from "../model/users"
 import Mongo from "../dataBase/mongo"
 import assert from "http-assert"
 

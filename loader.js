@@ -104,9 +104,10 @@ const Config = (configs = []) => {
 }
 const Middleware = (mids = []) => {
   return (target) => {
+    const midObj = new target()
     mids.forEach(mid => {
       console.log(`正在加载中间件：${mid}`)
-      middlewares.push(target.prototype[mid])
+      middlewares.push(midObj[mid])
     })
   }
 }

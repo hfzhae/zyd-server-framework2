@@ -260,6 +260,9 @@ import mount from "koa-mount"
   "homePage",
 ])
 class Middlewares {
+  constructor() {
+    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置中构造器中
+  }
   async error (ctx, next) {
     try {
       await next()
@@ -280,9 +283,6 @@ class Middlewares {
       return
     }
     await next()
-  }
-  homePage (ctx, next) {
-    return mount('/homePage', static('./homePage'))
   }
 }
 ```

@@ -261,7 +261,7 @@ import mount from "koa-mount"
 ])
 class Middlewares {
   constructor() {
-    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置中构造器中
+    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中
   }
   async error (ctx, next) {
     try {

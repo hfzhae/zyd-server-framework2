@@ -248,11 +248,37 @@ export default class Mongo {
   }
 }
 ```
+>/dataBase/mongo.js
+```js
+import sql from "mssql"
+export default class Mssql {
+  constructor() {
+    sql.connect({
+      server: "127.0.0.1",
+      database: "eb3000",
+      user: "sa",
+      password: "",
+      port: 1433,
+      options: {
+        // encrypt: true, // Use this if you're on Windows Azure
+        enableArithAbort: true,
+        encrypt: false 
+      },
+      pool: {
+        min: 0,
+        max: 10,
+        idleTimeoutMillis: 3000
+      }
+    })
+    this.db = sql
+  }
+}
+```
 ## middleware
 >/middleware/middleware.js
 ```js
 import { Middleware } from "zyd-server-framework2"
-import static from "koa-static"
+import koaStatic from "koa-static"
 import mount from "koa-mount"
 @Middleware([
   "error",
@@ -360,6 +386,20 @@ class Users {
   }
 }
 export default Users
+```
+>/service/product.js
+```js
+import { DataBase } from "zyd-server-framework2"
+import Mssql from "../dataBase/mssql"
+
+@DataBase([Mssql])
+class Product {
+  async get () {
+    const result = await this.dbs.Mssql.db.query("select * from biProduct where id=1101")
+    return result
+  }
+}
+export default Product
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

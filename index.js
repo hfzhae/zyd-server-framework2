@@ -24,7 +24,7 @@ const Init = require("./init")
 const Koa = require("koa")
 const version = require('./package.json').version
 class Zsf {
-  constructor() {
+  constructor(conf = {}) {
     const dir = __dirname.split("/node_modules/zyd-server-framework2")[0]
     new Init(dir)
     console.log(`\x1B[33m
@@ -35,10 +35,14 @@ class Zsf {
 version：${version}
 \x1B[0m`)
     this.$app = new Koa()
+    //生命周期函数 - init前 zz 2023-1-4
+    if (conf && conf.beforeInit) conf.beforeInit(this.$app)
     this.$app.use(require("koa-bodyparser")())
-    const { router, middlewares } = Injectable({ folder: resolve(dir, ".") })
+    const { router, middlewares } = Injectable({ folder: resolve(dir, "."), conf })
     middlewares.forEach(m => { this.$app.use(m) })
     this.$app.use(router.routes())
+    //生命周期函数 - init后 zz 2023-1-4
+    if (conf && conf.afterInit) conf.afterInit(this.$app)
   }
   start (port = 3000, callBack = () => {
     console.log("start on port:" + port)

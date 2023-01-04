@@ -5,20 +5,22 @@
  */
 const Router = require("koa-router")
 const router = new Router()
+let baseUrl = ""
 const decorate = ({ method, url = "", router }) => {
   return (target, property, descriptor) => {
-    process.nextTick(() => {
+    // process.nextTick(() => {
       const mids = []
       // const obj = new target.constructor()
       mids.push(async ctx => { ctx.body = await target[property](ctx) })
       if (!url) {
-        url = property
+        url = property // 路由后缀
       }
       url = `/${target.constructor.name}/${url}`
-      target.prefix && (url = `/${target.prefix}${url}`)
+      target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
+      url = baseUrl + url // 添加基础路径
       console.log(`正在映射地址：${method} ${url}`)
       router[method](url, ...mids)
-    })
+    // })
   }
 }
 const method = method => (url) => decorate({ method, url, router })
@@ -126,12 +128,13 @@ const DataBase = (dbs = []) => {
 /**
  * 注入函数
  */
-const Injectable = ({ folder }) => {
+const Injectable = ({ folder, conf = {} }) => {
   const fs = require("fs")
   const path = require("path")
+  baseUrl = conf.baseUrl || ""
   fs.readdirSync(folder).forEach(filename => {
     if (fs.statSync(path.join(folder, filename)).isDirectory() && filename !== "node_modules") {
-      Injectable({ folder: `${folder}/${filename}` })
+      Injectable({ folder: `${folder}/${filename}`, conf })
     } else {
       if (filename.split(".").pop() === "js") {
         require("./" + path.relative(__dirname, folder) + "/" + filename)

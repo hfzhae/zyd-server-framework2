@@ -60,11 +60,9 @@ export default class AuthToken {
     this.auth(ctx)
   }
   auth (ctx) {
-    this.sign(ctx)
+    assert(ctx.header.Authorization, 402, "auth error")
     ctx.state.partnerId = "xxxxxx"
-    assert(false, 402, "error")
   }
-  sign (ctx) { }
 }    
     `)
   }
@@ -244,7 +242,7 @@ export default Users
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import { Schedule } from "zyd-server-framework2"
 class Index {
-  @Schedule("* * 1 * * *") //crontab格式
+  @Schedule("0 0 1 * * *") //crontab格式
   handler () {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }

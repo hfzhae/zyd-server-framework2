@@ -11,11 +11,11 @@ const decorate = ({ method, url = "", router, options = {} }) => {
   return (target, property, descriptor) => {
     process.nextTick(() => {
       const mids = []
+      if (target.middlewares) {
+        mids.push(...target.middlewares)
+      }
       if (options.middlewares) { // 是否配置了中间件
-        options.middlewares.forEach(mid => {
-          console.log(`正在加载中间件：${mid.name}`)
-          mids.push(mid)
-        })
+        mids.push(...options.middlewares)
       }
       mids.push(async ctx => { ctx.body = await target[property](ctx) })
       if (!url) {
@@ -32,7 +32,7 @@ const decorate = ({ method, url = "", router, options = {} }) => {
 const method = method => (url, options) => decorate({ method, url, router, options })
 
 /**
- * 函数装饰器
+ * 方法装饰器
  */
 const Get = method("get")
 const Put = method("put")
@@ -129,7 +129,11 @@ const DataBase = (dbs = []) => {
     })
   }
 }
-
+const Middlewares = (mids) => {
+  return (target) => {
+    target.prototype.middlewares = mids
+  }
+}
 /**
  * 注入函数
  */
@@ -164,4 +168,5 @@ module.exports = {
   Middleware,
   DataBase,
   Injectable,
+  Middlewares,
 }

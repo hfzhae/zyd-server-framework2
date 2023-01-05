@@ -107,8 +107,9 @@ name|params|desc
 Controller|prefix|定义控制器对象，prefix(String):前缀路径
 Model|models|定义数据库模型对象，models(Array[Class]):数据库模型对象
 Config|configs|定义配置对象，configs(Array[Class]):配置对象
-Middleware|mids|定义中间件对象，mids(Array[Class]):中间件对象
+Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
 DataBase|dbs|定义数据库对象，dbs(Array[Class]):数据库配置对象
+Middlewares|mids|定义类中间件方法，mids(Array[Function]):中间件方法
 ## Function decorators
 name|params|desc
 -|-|-
@@ -128,11 +129,9 @@ export default class AuthToken {
     this.auth(ctx)
   }
   auth (ctx) {
-    this.sign(ctx)
+    assert(ctx.header.Authorization, 402, "auth error")
     ctx.state.partnerId = "xxxxxx"
-    assert(false, 402, "auth error")
   }
-  sign (ctx) { }
 }
 ```
 >/controller/users.js
@@ -172,28 +171,34 @@ class Users {
 ## controller
 >/controller/users.js
 ```js
-import { Post, Get, Service, Controller, Auth, Config, Model } from "zyd-server-framework2"
+import { Post, Get, Service, Controller, Auth, Config, Model, Middlewares } from "zyd-server-framework2"
 import UsersService from "../service/users"
 import ProductService from "../service/product"
 import AuthToken from "../authenticator/authToken"
 import Global from "../config/index"
-
+import assert from "http-assert"
 @Service([UsersService, ProductService])
 @Controller("api") // prefix
 @Config([Global])
-class Users {
-  @Post()
-  add (ctx) {
-    return { success: true, ...ctx.request.body }
+@Middlewares([
+  async (ctx, next) => {
+    assert(ctx.header.token, 408, "invalid token")
+    await next()
   }
-  @Get("/getUsers", {
+])
+class Users {
+  @Post("", {
     middlewares: [
       async function validation (ctx, next) {
-        console.log("is options middlewares: validation")
+        assert(ctx.request.body.name, 400, "missing name")
         await next()
       },
     ]
   })
+  add (ctx) {
+    return { success: true, ...ctx.request.body }
+  }
+  @Get("/getUsers")
   @Auth(AuthToken)
   async get (ctx) {
     console.log(ctx.state.partnerId) // "XXXXXX"
@@ -356,7 +361,7 @@ export default Users
 ```js
 import { Schedule } from "zyd-server-framework2"
 class Index {
-  @Schedule("* * 1 * * *") //crontab格式
+  @Schedule("0 0 1 * * *") //crontab格式
   printLog () {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }

@@ -18,6 +18,7 @@ const {
   Config,
   Schedule,
   DataBase,
+  Middlewares,
 } = require("./loader");
 const { resolve } = require("path")
 const Init = require("./init")
@@ -75,4 +76,5 @@ module.exports = {
   Config,
   Schedule,
   DataBase,
+  Middlewares,
 }

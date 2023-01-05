@@ -39,7 +39,7 @@ version：${version}
     if (conf && conf.beforeInit) conf.beforeInit(this.$app)
     this.$app.use(require("koa-bodyparser")())
     const { router, middlewares } = Injectable({ folder: resolve(dir, "."), conf })
-    middlewares.forEach(m => { this.$app.use(m) })
+    this.$app.use(...middlewares)
     this.$app.use(router.routes())
     //生命周期函数 - init后 zz 2023-1-4
     process.nextTick(() => {

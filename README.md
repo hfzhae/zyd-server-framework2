@@ -112,11 +112,11 @@ DataBase|dbs|定义数据库对象，dbs(Array[Class]):数据库配置对象
 ## Function decorators
 name|params|desc
 -|-|-
-Get|url|定义Get方法路由，url(String)后置路径
-Put|url|定义Put方法路由，url(String)后置路径
-Del|url|定义Del方法路由，url(String)后置路径
-Post|url|定义Post方法路由，url(String)后置路径
-Patch|url|定义Patch方法路由，url(String)后置路径
+Get|url,options|定义Get方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
+Put|url,options|定义Put方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
+Del|url,options|定义Del方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
+Post|url,options|定义Post方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
+Patch|url,options|定义Patch方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
 Auth|auth|定义路由认证对象，auth(Class)认证对象
 Schedule|interval|定义定时器对象，interval(String)定时器规则，crontab格式
 ## authenticator
@@ -174,10 +174,11 @@ class Users {
 ```js
 import { Post, Get, Service, Controller, Auth, Config, Model } from "zyd-server-framework2"
 import UsersService from "../service/users"
+import ProductService from "../service/product"
 import AuthToken from "../authenticator/authToken"
 import Global from "../config/index"
 
-@Service([UsersService])
+@Service([UsersService, ProductService])
 @Controller("api") // prefix
 @Config([Global])
 class Users {
@@ -185,13 +186,25 @@ class Users {
   add (ctx) {
     return { success: true, ...ctx.request.body }
   }
-  @Get("/getUsers")
+  @Get("/getUsers", {
+    middlewares: [
+      async function validation (ctx, next) {
+        console.log("is options middlewares: validation")
+        await next()
+      },
+    ]
+  })
   @Auth(AuthToken)
   async get (ctx) {
     console.log(ctx.state.partnerId) // "XXXXXX"
     console.log(this.configs.Global.path) // "/"
     console.log(ctx.request.query) // { name: "lucy" }
-    return await this.services.Users.setUsers(ctx)
+    const resultUser = await this.services.Users.setUsers(ctx)
+    const resultProduct = await this.services.Product.get(ctx)
+    return {
+      resultUser,
+      resultProduct
+    }
   }
 }
 ```

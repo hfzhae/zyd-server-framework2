@@ -5,12 +5,18 @@
  */
 const Router = require("koa-router")
 const router = new Router()
+const middlewares = []
 let baseUrl = ""
-const decorate = ({ method, url = "", router }) => {
+const decorate = ({ method, url = "", router, options = {} }) => {
   return (target, property, descriptor) => {
     process.nextTick(() => {
       const mids = []
-      // const obj = new target.constructor()
+      if (options.middlewares) { // 是否配置了中间件
+        options.middlewares.forEach(mid => {
+          console.log(`正在加载中间件：${mid.name}`)
+          mids.push(mid)
+        })
+      }
       mids.push(async ctx => { ctx.body = await target[property](ctx) })
       if (!url) {
         url = property // 路由后缀
@@ -23,8 +29,7 @@ const decorate = ({ method, url = "", router }) => {
     })
   }
 }
-const method = method => (url) => decorate({ method, url, router })
-const middlewares = []
+const method = method => (url, options) => decorate({ method, url, router, options })
 
 /**
  * 函数装饰器

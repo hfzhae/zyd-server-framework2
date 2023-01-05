@@ -7,11 +7,11 @@ const fs = require("fs")
 module.exports = class Init {
   constructor(dir) {
     this.dir = dir
-    this.createExamplesAuthenticatorFile(dir)
     this.createExamplesConfigFile(dir)
     this.createExamplesControllerFile(dir)
     this.createExamplesDataBaseFile(dir)
     this.createExamplesMiddlewareFile(dir)
+    this.createExamplesMiddlewareTokenFile(dir)
     this.createExamplesModelFile(dir)
     this.createExamplesScheduleFile(dir)
     this.createExamplesServiceFile(dir)
@@ -33,8 +33,7 @@ module.exports = class Init {
       }
     ]
   ]
-}
-    `)
+}`)
   }
   createJsonConfigFile (dir) {
     dir += "/jsconfig.json"
@@ -43,28 +42,7 @@ module.exports = class Init {
   "compilerOptions": {
     "experimentalDecorators": true
   }
-}
-    `)
-  }
-  createExamplesAuthenticatorFile (dir) {
-    if (fs.existsSync(dir + "/jsconfig.json")) return
-    dir += "/authenticator"
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
-    }
-    dir += "/authToken.js"
-    if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import assert from "http-assert"
-export default class AuthToken {
-  constructor(ctx) {
-    this.auth(ctx)
-  }
-  auth (ctx) {
-    assert(ctx.header.Authorization, 402, "auth error")
-    ctx.state.partnerId = "xxxxxx"
-  }
-}    
-    `)
+}`)
   }
   createExamplesConfigFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -74,12 +52,13 @@ export default class AuthToken {
     }
     dir += "/index.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `export default class Index {
+    fs.writeFileSync(dir, `import { Config } from "zyd-server-framework2"
+@Config()
+class Index {
   constructor() {
     this.path = "/"
   }
-}
-    `)
+}`)
   }
   createExamplesControllerFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -89,29 +68,32 @@ export default class AuthToken {
     }
     dir += "/users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import { Post, Get, Service, Controller, Auth, Config } from "zyd-server-framework2"
-import UsersService from "../service/users"
-import AuthToken from "../authenticator/authToken"
-import ConfigIndex from "../config/index"
-    
-@Service([UsersService])
+    fs.writeFileSync(dir, `import { Post, Get, Controller, Middlewares } from "zyd-server-framework2"
+import assert from "http-assert"
+import authToken from "../middleware/authToken"
 @Controller("api") // prefix
-@Config([ConfigIndex])
+@Middlewares([authToken])
 class Users {
-  @Post()
+  @Post("", {
+    middlewares: [
+      async function validation (ctx, next) {
+        const name = ctx.request.body.name
+        assert(name, 400, "Missing name")
+        await next()
+      },
+    ]
+  })
   add (ctx) {
     return { success: true, ...ctx.request.body }
   }
   @Get()
-  @Auth(AuthToken)
   async get (ctx) {
-    // console.log(ctx.state.partnerId)
-    // console.log(this.configs.Index.path)
-    // console.log(ctx.request.query)
-    return await this.services.Users.setUsers(ctx)
+    console.log(ctx.state.partnerId)
+    console.log(this.app.configs.Index.path)
+    console.log(ctx.request.query)
+    return await this.app.services.Users.setUsers(ctx)
   }
-}
-    `)
+}`)
   }
   createExamplesDataBaseFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -121,8 +103,10 @@ class Users {
     }
     dir += "/mongo.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import mongoose from "mongoose"
-module.exports = class Mongo {
+    fs.writeFileSync(dir, `import { DataBase } from "zyd-server-framework2"
+import mongoose from "mongoose"
+@DataBase()
+class Mongo {
   constructor() {
     this.prod = mongoose.createConnection(\`mongodb://127.0.0.1:27017?replicaSet=rs0\`, {
       // useCreateIndex: true,
@@ -132,7 +116,7 @@ module.exports = class Mongo {
       dbName: "prodDb"
     })
     this.prod.on("connected", () => {
-      // console.log('mongodb connect prod success')
+      console.log('mongodb connect prod success')
     })
     this.prod.on("error", () => {
       console.log('mongodb connect prod error')
@@ -148,7 +132,7 @@ module.exports = class Mongo {
       dbName: "testDb"
     })
     this.test.on("connected", () => {
-      // console.log('mongodb connect test success')
+      console.log('mongodb connect test success')
     })
     this.test.on("error", () => {
       console.log('mongodb connect test error')
@@ -167,8 +151,7 @@ module.exports = class Mongo {
     })
     return session
   }
-}
-    `)
+}`)
   }
   createExamplesMiddlewareFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -197,8 +180,23 @@ class Middlewares {
       ctx.status = code // 200
     }
   }
-}
-    `)
+}`)
+  }
+  createExamplesMiddlewareTokenFile (dir) {
+    if (fs.existsSync(dir + "/jsconfig.json")) return
+    dir += "/middleware"
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir)
+    }
+    dir += "/authToken.js"
+    if (fs.existsSync(dir)) return
+    fs.writeFileSync(dir, `import assert from "http-assert"
+export default async (ctx, next) => {
+  const name = ctx.request.body.name
+  assert(ctx.header.token, 408, "invalid token")
+  ctx.state.partnerId = "xxxxxx"
+  await next()
+}`)
   }
   createExamplesModelFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -209,12 +207,10 @@ class Middlewares {
     dir += "/users.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import mongoose from "mongoose"
-import { DataBase } from "zyd-server-framework2"
-import Mongo from "../dataBase/mongo"
-
-@DataBase([Mongo])
+import { Model } from "zyd-server-framework2"
+@Model()
 class Users {
-  constructor() {
+  constructor(app) {
     const schema = new mongoose.Schema({
       name: { type: String },
       age: { type: Number }
@@ -225,12 +221,10 @@ class Users {
         updatedAt: "updatedAt"
       }
     })
-    this.prod = this.dbs.Mongo.prod.model("users", schema, "users")
-    this.test = this.dbs.Mongo.test.model("users", schema, "users")
+    this.prod = this.app.dbs.Mongo.prod.model("users", schema, "users")
+    this.test = this.app.dbs.Mongo.test.model("users", schema, "users")
   }
-}
-export default Users
-    `)
+}`)
   }
   createExamplesScheduleFile (dir) {
     if (fs.existsSync(dir + "/jsconfig.json")) return
@@ -257,24 +251,20 @@ class Index {
     }
     dir += "/users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import { Model, DataBase } from "zyd-server-framework2"
-import ModelUsers from "../model/users"
-import Mongo from "../dataBase/mongo"
+    fs.writeFileSync(dir, `import { Service } from "zyd-server-framework2"
 import assert from "http-assert"
-
-@DataBase([Mongo])
-@Model([ModelUsers])
+@Service()
 class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
-    const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
+    const session = await this.app.dbs.Mongo.mongoSession(this.app.dbs.Mongo.prod)
     let result = []
     try {
-      result.push(await this.models.Users.prod.create(
+      result.push(await this.app.models.Users.prod.create(
         [{ name: "张三", age: 25 }],
         { session }
       ))
-      result.push(await this.models.Users.prod.findByIdAndUpdate(
+      result.push(await this.app.models.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
@@ -289,8 +279,6 @@ class Users {
       await session.endSession()
     }
   }
-}
-export default Users
-    `)
+}`)
   }
 }

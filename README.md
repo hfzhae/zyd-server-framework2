@@ -105,10 +105,11 @@ app.start(3000, callBack(){
 name|params|desc
 -|-|-
 Controller|prefix|定义控制器对象，prefix(String):前缀路径
-Model|models|定义数据库模型对象，models(Array[Class]):数据库模型对象
-Config|configs|定义配置对象，configs(Array[Class]):配置对象
+Model||定义数据库模型对象
+Config||定义配置对象
+DataBase||定义数据库对象
+Service||定义服务对象
 Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
-DataBase|dbs|定义数据库对象，dbs(Array[Class]):数据库配置对象
 Middlewares|mids|定义类中间件方法，mids(Array[Function]):中间件方法
 ## Function decorators
 name|params|desc
@@ -118,38 +119,13 @@ Put|url,options|定义Put方法路由，url(String)后置路径，options(Object
 Del|url,options|定义Del方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
 Post|url,options|定义Post方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
 Patch|url,options|定义Patch方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Auth|auth|定义路由认证对象，auth(Class)认证对象
 Schedule|interval|定义定时器对象，interval(String)定时器规则，crontab格式
-## authenticator
->/authenticator/authToken.js
-```js
-import assert from "http-assert"
-export default class AuthToken {
-  constructor(ctx) {
-    this.auth(ctx)
-  }
-  auth (ctx) {
-    assert(ctx.header.Authorization, 402, "auth error")
-    ctx.state.partnerId = "xxxxxx"
-  }
-}
-```
->/controller/users.js
-```js
-import { Get } from "zyd-server-framework2"
-import AuthToken from "../authenticator/authToken"
-class Users {
-  @Get()
-  @Auth(AuthToken)
-  async get (ctx) {
-    return { success: true }
-  }
-}
-```
-## config
+## Config
 >/config/conf.js
 ```js
-export default class Global {
+import { Config } from "zyd-server-framework2"
+@Config()
+class Index {
   constructor() {
     this.path = "/"
   }
@@ -157,40 +133,22 @@ export default class Global {
 ```
 >/controller/users.js
 ```js
-import { Get, Config } from "zyd-server-framework2"
-import Global from "../config/index"
-@Config([Global])
-class Users {
-  @Get()
-  async get (ctx) {
-    const path = this.configs.Global.path // "/"
-    return { path }
-  }
-}
+this.app.configs.Index.path
 ```
-## controller
+## Controller
 >/controller/users.js
 ```js
-import { Post, Get, Service, Controller, Auth, Config, Model, Middlewares } from "zyd-server-framework2"
-import UsersService from "../service/users"
-import ProductService from "../service/product"
-import AuthToken from "../authenticator/authToken"
-import Global from "../config/index"
+import { Post, Get, Controller, Middlewares } from "zyd-server-framework2"
 import assert from "http-assert"
-@Service([UsersService, ProductService])
+import authToken from "../middleware/authToken"
 @Controller("api") // prefix
-@Config([Global])
-@Middlewares([
-  async (ctx, next) => {
-    assert(ctx.header.token, 408, "invalid token")
-    await next()
-  }
-])
+@Middlewares([authToken])
 class Users {
   @Post("", {
     middlewares: [
       async function validation (ctx, next) {
-        assert(ctx.request.body.name, 400, "missing name")
+        const name = ctx.request.body.name
+        assert(name, 400, "Missing name")
         await next()
       },
     ]
@@ -198,28 +156,24 @@ class Users {
   add (ctx) {
     return { success: true, ...ctx.request.body }
   }
-  @Get("/getUsers")
-  @Auth(AuthToken)
+  @Get()
   async get (ctx) {
-    console.log(ctx.state.partnerId) // "XXXXXX"
-    console.log(this.configs.Global.path) // "/"
-    console.log(ctx.request.query) // { name: "lucy" }
-    const resultUser = await this.services.Users.setUsers(ctx)
-    const resultProduct = await this.services.Product.get(ctx)
-    return {
-      resultUser,
-      resultProduct
-    }
+    console.log(ctx.state.partnerId) // xxxxxx
+    console.log(this.app.configs.Index.path) // \
+    console.log(ctx.request.query.name) // lucy
+    return await this.app.services.Users.setUsers(ctx)
   }
 }
 ```
-[http://localhost:3000/api/Users/getUsers?name=lucy](http://localhost:3000/api/Users/getUsers?name=lucy)
+[http://localhost:3000/api/Users/get?name=lucy](http://localhost:3000/api/Users/get?name=lucy)
 
-## dataBase
+## DataBase
 >/dataBase/mongo.js
 ```js
+import { DataBase } from "zyd-server-framework2"
 import mongoose from "mongoose"
-export default class Mongo {
+@DataBase()
+class Mongo {
   constructor() {
     this.prod = mongoose.createConnection(`mongodb://127.0.0.1:27017?replicaSet=rs0`, {
       // useCreateIndex: true,
@@ -266,33 +220,11 @@ export default class Mongo {
   }
 }
 ```
->/dataBase/mssql.js
 ```js
-import sql from "mssql"
-export default class Mssql {
-  constructor() {
-    sql.connect({
-      server: "127.0.0.1",
-      database: "eb3000",
-      user: "sa",
-      password: "",
-      port: 1433,
-      options: {
-        // encrypt: true, // Use this if you're on Windows Azure
-        enableArithAbort: true,
-        encrypt: false 
-      },
-      pool: {
-        min: 0,
-        max: 10,
-        idleTimeoutMillis: 3000
-      }
-    })
-    this.db = sql
-  }
-}
+this.app.dbs.Mongo.prod
+this.app.dbs.Mongo.test
 ```
-## middleware
+## Middleware
 >/middleware/middleware.js
 ```js
 import { Middleware } from "zyd-server-framework2"
@@ -330,15 +262,24 @@ class Middlewares {
   }
 }
 ```
-## model
+>/middleware/authToken.js
+```js
+import assert from "http-assert"
+export default async (ctx, next) => {
+  const name = ctx.request.body.name
+  assert(ctx.header.token, 408, "invalid token")
+  ctx.state.partnerId = "xxxxxx"
+  await next()
+}
+```
+## Model
 >/model/users.js
 ```js
 import mongoose from "mongoose"
-import { DataBase } from "zyd-server-framework2"
-import Mongo from "../dataBase/mongo"
-@DataBase([Mongo])
+import { Model } from "zyd-server-framework2"
+@Model()
 class Users {
-  constructor() {
+  constructor(app) {
     const schema = new mongoose.Schema({
       name: { type: String },
       age: { type: Number }
@@ -349,45 +290,42 @@ class Users {
         updatedAt: "updatedAt"
       }
     })
-    this.prod = this.dbs.Mongo.prod.model("users", schema, "users")
-    this.test = this.dbs.Mongo.test.model("users", schema, "users")
+    this.prod = this.app.dbs.Mongo.prod.model("users", schema, "users")
+    this.test = this.app.dbs.Mongo.test.model("users", schema, "users")
   }
 }
-export default Users
 ```
-## schedule
+```js
+this.app.models.Users.prod
+```
+## Schedule
 >/schedule/index.js
-
 ```js
 import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("0 0 1 * * *") //crontab格式
-  printLog () {
+  handler () {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }
 }
 ```
-## service
+## Service
 >/service/users.js
 ```js
-import { Model, DataBase } from "zyd-server-framework2"
-import ModelUsers from "../model/Users"
-import Mongo from "../dataBase/mongo"
+import { Service } from "zyd-server-framework2"
 import assert from "http-assert"
-
-@DataBase([Mongo])
-@Model([ModelUsers])
+@Service()
 class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
-    const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
-    let result
+    const session = await this.app.dbs.Mongo.mongoSession(this.app.dbs.Mongo.prod)
+    let result = []
     try {
-      result = await this.models.Users.prod.create(
-        { name: "张三", age: 25 },
+      result.push(await this.app.models.Users.prod.create(
+        [{ name: "张三", age: 25 }],
         { session }
-      )
-      result.push(await this.models.Users.prod.findByIdAndUpdate(
+      ))
+      result.push(await this.app.models.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
@@ -403,21 +341,9 @@ class Users {
     }
   }
 }
-export default Users
 ```
->/service/product.js
 ```js
-import { DataBase } from "zyd-server-framework2"
-import Mssql from "../dataBase/mssql"
-
-@DataBase([Mssql])
-class Product {
-  async get () {
-    const result = await this.dbs.Mssql.db.query("select * from biProduct where id=1101")
-    return result
-  }
-}
-export default Product
+this.app.services.Users.setUsers(ctx)
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

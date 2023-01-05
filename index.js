@@ -14,7 +14,6 @@ const {
   Model,
   Middleware,
   Controller,
-  Auth,
   Config,
   Schedule,
   DataBase,
@@ -39,7 +38,7 @@ version：${version}
     //生命周期函数 - init前 zz 2023-1-4
     if (conf && conf.beforeInit) conf.beforeInit(this.$app)
     this.$app.use(require("koa-bodyparser")())
-    const { router, middlewares } = Injectable({ folder: resolve(dir, "."), conf })
+    const { router, middlewares } = Injectable({ folder: resolve(dir, "."), conf: { ...conf, app: this } })
     this.$app.use(...middlewares)
     this.$app.use(router.routes())
     //生命周期函数 - init后 zz 2023-1-4
@@ -72,7 +71,6 @@ module.exports = {
   Model,
   Middleware,
   Controller,
-  Auth,
   Config,
   Schedule,
   DataBase,

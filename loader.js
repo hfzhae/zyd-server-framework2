@@ -7,6 +7,7 @@ const Router = require("koa-router")
 const router = new Router()
 const middlewares = []
 let baseUrl = ""
+let app
 const decorate = ({ method, url = "", router, options = {} }) => {
   return (target, property, descriptor) => {
     process.nextTick(() => {
@@ -16,6 +17,9 @@ const decorate = ({ method, url = "", router, options = {} }) => {
       }
       if (options.middlewares) { // 是否配置了中间件
         mids.push(...options.middlewares)
+      }
+      if (target[property].prototype.auth) {
+        mids.push(...target[property].prototype.auth)
       }
       mids.push(async ctx => { ctx.body = await target[property](ctx) })
       if (!url) {
@@ -40,23 +44,6 @@ const Del = method("del")
 const Post = method("post")
 const Patch = method("patch")
 /**
- * 认证装饰器
- * @param {Class} auth 
- */
-const Auth = (auth) => {
-  return (target, property, descriptor) => {
-    if (auth) {
-      const original = descriptor.value
-      if (typeof original === 'function') {
-        descriptor.value = function (...args) {
-          new auth(...args)
-          return original.apply(this, args)
-        }
-      }
-    }
-  }
-}
-/**
  * 定时装饰器
  * @param {String} interval crontab格式
  */
@@ -76,37 +63,39 @@ const Schedule = (interval) => {
 const Controller = (prefix) => {
   return (target) => {
     prefix && (target.prototype.prefix = prefix)
+    target.prototype.app = app
   }
 }
-const Service = (services = []) => {
+const Service = () => {
   return (target) => {
-    if (!target.prototype.services) {
-      target.prototype.services = []
+    target.prototype.app = app
+    if (!app.services) {
+      app.services = []
     }
-    services.forEach(service => {
-      target.prototype.services[service.name] = new service()
+    console.log(`正在加载服务：${target.name}`)
+    app.services[target.name] = new target()
+  }
+}
+const Model = () => {
+  return (target) => {
+    process.nextTick(() => {
+      target.prototype.app = app
+      if (!app.models) {
+        app.models = []
+      }
+      console.log(`正在加载模型：${target.name}`)
+      app.models[target.name] = new target(app)
     })
   }
 }
-const Model = (models = []) => {
+const Config = () => {
   return (target) => {
-    if (!target.prototype.models) {
-      target.prototype.models = {}
+    target.prototype.app = app
+    if (!app.configs) {
+      app.configs = []
     }
-    models.forEach(model => {
-      console.log(`正在加载模型：${model.name}`)
-      target.prototype.models[model.name] = new model()
-    })
-  }
-}
-const Config = (configs = []) => {
-  return (target) => {
-    if (!target.prototype.configs) {
-      target.prototype.configs = []
-    }
-    configs.forEach(config => {
-      target.prototype.configs[config.name] = new config()
-    })
+    console.log(`正在加载配置：${target.name}`)
+    app.configs[target.name] = new target()
   }
 }
 const Middleware = (mids = []) => {
@@ -116,22 +105,23 @@ const Middleware = (mids = []) => {
       console.log(`正在加载中间件：${mid}`)
       middlewares.push(midObj[mid])
     })
+    target.prototype.app = app
   }
 }
-const DataBase = (dbs = []) => {
+const DataBase = () => {
   return (target) => {
-    if (!target.prototype.dbs) {
-      target.prototype.dbs = []
+    target.prototype.app = app
+    if (!app.dbs) {
+      app.dbs = []
     }
-    dbs.forEach(db => {
-      console.log(`正在加载数据库：{db:${db.name},class:${target.name}}`)
-      target.prototype.dbs[db.name] = new db()
-    })
+    console.log(`正在加载数据库：${target.name}`)
+    app.dbs[target.name] = new target()
   }
 }
 const Middlewares = (mids) => {
   return (target) => {
     target.prototype.middlewares = mids
+    target.prototype.app = app
   }
 }
 /**
@@ -140,6 +130,7 @@ const Middlewares = (mids) => {
 const Injectable = ({ folder, conf = {} }) => {
   const fs = require("fs")
   const path = require("path")
+  app = conf.app
   baseUrl = conf.baseUrl || ""
   fs.readdirSync(folder).forEach(filename => {
     if (fs.statSync(path.join(folder, filename)).isDirectory() && filename !== "node_modules") {
@@ -159,7 +150,6 @@ module.exports = {
   Del,
   Post,
   Patch,
-  Auth,
   Schedule,
   Controller,
   Service,

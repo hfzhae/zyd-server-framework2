@@ -133,7 +133,7 @@ class Index {
 ```
 >/controller/users.js
 ```js
-this.app.configs.Index.path
+this.configs.Index.path
 ```
 ## Controller
 >/controller/users.js
@@ -156,16 +156,16 @@ class Users {
   add (ctx) {
     return { success: true, ...ctx.request.body }
   }
-  @Get()
+  @Get("getInfo")
   async get (ctx) {
     console.log(ctx.state.partnerId) // xxxxxx
-    console.log(this.app.configs.Index.path) // \
+    console.log(this.configs.Index.path) // \
     console.log(ctx.request.query.name) // lucy
-    return await this.app.services.Users.setUsers(ctx)
+    return await this.services.Users.setUsers(ctx)
   }
 }
 ```
-[http://localhost:3000/api/Users/get?name=lucy](http://localhost:3000/api/Users/get?name=lucy)
+[http://localhost:3000/api/Users/getInfo?name=lucy](http://localhost:3000/api/Users/get?name=lucy)
 
 ## DataBase
 >/dataBase/mongo.js
@@ -221,8 +221,8 @@ class Mongo {
 }
 ```
 ```js
-this.app.dbs.Mongo.prod
-this.app.dbs.Mongo.test
+this.dbs.Mongo.prod
+this.dbs.Mongo.test
 ```
 ## Middleware
 >/middleware/middleware.js
@@ -266,7 +266,6 @@ class Middlewares {
 ```js
 import assert from "http-assert"
 export default async (ctx, next) => {
-  const name = ctx.request.body.name
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()
@@ -290,13 +289,13 @@ class Users {
         updatedAt: "updatedAt"
       }
     })
-    this.prod = this.app.dbs.Mongo.prod.model("users", schema, "users")
-    this.test = this.app.dbs.Mongo.test.model("users", schema, "users")
+    this.prod = this.dbs.Mongo.prod.model("users", schema, "users")
+    this.test = this.dbs.Mongo.test.model("users", schema, "users")
   }
 }
 ```
 ```js
-this.app.models.Users.prod
+this.models.Users.prod
 ```
 ## Schedule
 >/schedule/index.js
@@ -318,14 +317,14 @@ import assert from "http-assert"
 class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
-    const session = await this.app.dbs.Mongo.mongoSession(this.app.dbs.Mongo.prod)
+    const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
     let result = []
     try {
-      result.push(await this.app.models.Users.prod.create(
+      result.push(await this.models.Users.prod.create(
         [{ name: "张三", age: 25 }],
         { session }
       ))
-      result.push(await this.app.models.Users.prod.findByIdAndUpdate(
+      result.push(await this.models.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
@@ -343,7 +342,7 @@ class Users {
 }
 ```
 ```js
-this.app.services.Users.setUsers(ctx)
+this.services.Users.setUsers(ctx)
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

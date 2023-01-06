@@ -8,6 +8,11 @@ const router = new Router()
 const middlewares = []
 let baseUrl = ""
 let app
+/**
+ * 工厂
+ * @param {*} param0 
+ * @returns 
+ */
 const decorate = ({ method, url = "", router, options = {} }) => {
   return (target, property, descriptor) => {
     process.nextTick(() => {
@@ -34,6 +39,11 @@ const decorate = ({ method, url = "", router, options = {} }) => {
   }
 }
 const method = method => (url, options) => decorate({ method, url, router, options })
+const injectApp = (target, app) => {
+  Object.keys(app).forEach(key => {
+    target.prototype[key] = app[key]
+  })
+}
 
 /**
  * 方法装饰器
@@ -62,66 +72,99 @@ const Schedule = (interval) => {
  */
 const Controller = (prefix) => {
   return (target) => {
+    injectApp(target, app)
     prefix && (target.prototype.prefix = prefix)
-    target.prototype.app = app
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 const Service = () => {
   return (target) => {
-    target.prototype.app = app
+    injectApp(target, app)
     if (!app.services) {
       app.services = []
     }
     console.log(`正在加载服务：${target.name}`)
     app.services[target.name] = new target()
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 const Model = () => {
   return (target) => {
     process.nextTick(() => {
-      target.prototype.app = app
+      injectApp(target, app)
       if (!app.models) {
         app.models = []
       }
       console.log(`正在加载模型：${target.name}`)
       app.models[target.name] = new target(app)
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
     })
   }
 }
 const Config = () => {
   return (target) => {
-    target.prototype.app = app
+    injectApp(target, app)
     if (!app.configs) {
       app.configs = []
     }
     console.log(`正在加载配置：${target.name}`)
     app.configs[target.name] = new target()
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 const Middleware = (mids = []) => {
   return (target) => {
+    injectApp(target, app)
     const midObj = new target()
     mids.forEach(mid => {
       console.log(`正在加载中间件：${mid}`)
       middlewares.push(midObj[mid])
     })
-    target.prototype.app = app
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 const DataBase = () => {
   return (target) => {
-    target.prototype.app = app
+    injectApp(target, app)
     if (!app.dbs) {
       app.dbs = []
     }
     console.log(`正在加载数据库：${target.name}`)
     app.dbs[target.name] = new target()
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 const Middlewares = (mids) => {
   return (target) => {
+    injectApp(target, app)
     target.prototype.middlewares = mids
-    target.prototype.app = app
+    process.nextTick(() => {
+      process.nextTick(() => {
+        injectApp(target, app)
+      })
+    })
   }
 }
 /**
@@ -143,7 +186,6 @@ const Injectable = ({ folder, conf = {} }) => {
   })
   return { router, middlewares }
 }
-
 module.exports = {
   Get,
   Put,

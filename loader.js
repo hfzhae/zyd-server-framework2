@@ -98,27 +98,27 @@ const Controller = (prefix) => {
 // 服务
 const Service = () => {
   return (target) => {
-    injectClass(target, "services")
+    injectClass(target, "service")
   }
 }
 // 模型
 const Model = () => {
   return (target) => {
     process.nextTick(() => {
-      injectClass(target, "models")
+      injectClass(target, "model")
     })
   }
 }
 // 配置
 const Config = () => {
   return (target) => {
-    injectClass(target, "configs")
+    injectClass(target, "config")
   }
 }
 // 数据库
 const DataBase = () => {
   return (target) => {
-    injectClass(target, "dbs")
+    injectClass(target, "db")
   }
 }
 // 中间件

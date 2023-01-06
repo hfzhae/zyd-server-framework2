@@ -134,7 +134,7 @@ class Index {
 ```
 >/controller/users.js
 ```js
-this.configs.Index.path
+this.config.Index.path
 ```
 ## Controller
 >/controller/users.js
@@ -160,14 +160,26 @@ class Users {
   @Get("getInfo")
   async get (ctx) {
     console.log(ctx.state.partnerId) // xxxxxx
-    console.log(this.configs.Index.path) // \
+    console.log(this.config.Index.path) // \
     console.log(ctx.request.query.name) // lucy
-    return await this.services.Users.setUsers(ctx)
+    return await this.service.Users.setUsers(ctx)
   }
 }
 ```
 [http://localhost:3000/api/Users/getInfo?name=lucy](http://localhost:3000/api/Users/get?name=lucy)
 
+>/controller/product.js
+```js
+import { Get, Controller } from "zyd-server-framework2"
+@Controller("api") // prefix
+class Product {
+  @Get()
+  async query (ctx) {
+    return await this.service.Product.query(ctx)
+  }
+}
+```
+[http://localhost:3000/api/product/query](http://localhost:3000/api/product/query)
 ## DataBase
 >/dataBase/mongo.js
 ```js
@@ -222,8 +234,39 @@ class Mongo {
 }
 ```
 ```js
-this.dbs.Mongo.prod
-this.dbs.Mongo.test
+this.db.Mongo.prod
+this.db.Mongo.test
+```
+>>/dataBase/mssql.js
+```js
+import Sequelize from "sequelize"
+import { DataBase } from "zyd-server-framework2"
+@DataBase()
+class Mssql {
+  constructor() {
+    this.prod = new Sequelize("eb3000", "sa", "", {
+      host: "localhost",
+      dialect: "mssql",
+      dialectOptions: {
+        options: {
+          encrypt: false,
+        },
+      }
+    })
+    this.conncet()
+  }
+  async conncet () {
+    try {
+      await this.prod.authenticate()
+      console.log("mssql connect success")
+     } catch (err) {
+      console.log('mssql connect error', err)
+    }
+  }
+}
+```
+```js
+this.db.Mssql.prod
 ```
 ## Middleware
 >/middleware/middleware.js
@@ -290,13 +333,37 @@ class Users {
         updatedAt: "updatedAt"
       }
     })
-    this.prod = this.dbs.Mongo.prod.model("users", schema, "users")
-    this.test = this.dbs.Mongo.test.model("users", schema, "users")
+    this.prod = this.db.Mongo.prod.model("users", schema, "users")
+    this.test = this.db.Mongo.test.model("users", schema, "users")
   }
 }
 ```
 ```js
-this.models.Users.prod
+this.model.Users.prod
+```
+>/model/product.js
+```js
+import { Model } from "zyd-server-framework2"
+import Sequelize from "sequelize"
+@Model()
+class Product {
+  constructor() {
+    this.prod = this.db.Mssql.prod.define("biProduct", {
+      id: {
+        type: Sequelize.NUMBER,
+        primaryKey: true
+      },
+      code: Sequelize.STRING,
+      title: Sequelize.STRING,
+    }, {
+      timestamps: false,
+      freezeTableName: true
+    })
+  }
+}
+```
+```js
+this.model.Product.prod
 ```
 ## Schedule
 >/schedule/index.js
@@ -318,14 +385,14 @@ import assert from "http-assert"
 class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
-    const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
+    const session = await this.db.Mongo.mongoSession(this.db.Mongo.prod)
     let result = []
     try {
-      result.push(await this.models.Users.prod.create(
+      result.push(await this.model.Users.prod.create(
         [{ name: "张三", age: 25 }],
         { session }
       ))
-      result.push(await this.models.Users.prod.findByIdAndUpdate(
+      result.push(await this.model.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }
@@ -343,7 +410,24 @@ class Users {
 }
 ```
 ```js
-this.services.Users.setUsers(ctx)
+this.service.Users.setUsers(ctx)
+```
+>/service/product.js
+```js
+import { Service } from "zyd-server-framework2"
+@Service()
+class Product {
+  async query (ctx) {
+    return await this.model.Product.prod.findAll({
+      where: {
+        id: 1
+      }
+    })
+  }
+}
+```
+```js
+this.service.Product.query(ctx)
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

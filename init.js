@@ -89,9 +89,9 @@ class Users {
   @Get()
   async get (ctx) {
     console.log(ctx.state.partnerId)
-    console.log(this.configs.Index.path)
+    console.log(this.config.Index.path)
     console.log(ctx.request.query)
-    return await this.services.Users.setUsers(ctx)
+    return await this.service.Users.setUsers(ctx)
   }
 }`)
   }
@@ -220,8 +220,8 @@ class Users {
         updatedAt: "updatedAt"
       }
     })
-    this.prod = this.dbs.Mongo.prod.model("users", schema, "users")
-    this.test = this.dbs.Mongo.test.model("users", schema, "users")
+    this.prod = this.db.Mongo.prod.model("users", schema, "users")
+    this.test = this.db.Mongo.test.model("users", schema, "users")
   }
 }`)
   }
@@ -256,14 +256,14 @@ import assert from "http-assert"
 class Users {
   async setUsers (ctx) {
     // mongo数据库执行事物方式
-    const session = await this.dbs.Mongo.mongoSession(this.dbs.Mongo.prod)
+    const session = await this.db.Mongo.mongoSession(this.db.Mongo.prod)
     let result = []
     try {
-      result.push(await this.models.Users.prod.create(
+      result.push(await this.model.Users.prod.create(
         [{ name: "张三", age: 25 }],
         { session }
       ))
-      result.push(await this.models.Users.prod.findByIdAndUpdate(
+      result.push(await this.model.Users.prod.findByIdAndUpdate(
         result._id,
         { $set: { name: "李四" }},
         { session }

@@ -66,8 +66,8 @@ dbs: Mongo √
 middleware: error √
 schedule: handler √
 services: Users √
-router: post /open/api/Users/add √
-router: get /open/api/Users/get √
+router: post /api/Users/add √
+router: get /api/Users/get √
 models: Users √
 
 start on port: 3000

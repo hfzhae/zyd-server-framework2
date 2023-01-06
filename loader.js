@@ -61,7 +61,7 @@ const Schedule = (interval) => {
   return (target, property, descriptor) => {
     if (interval) {
       const schedule = require("node-schedule")
-      console.log(`正在启动定时器: ${property}`)
+      console.log(`正在启动定时器：${property}`)
       schedule.scheduleJob(interval, () => target[property](app))
     }
   }
@@ -73,6 +73,7 @@ const Schedule = (interval) => {
 const Controller = (prefix) => {
   return (target) => {
     injectApp(target, app)
+    console.log(`正在加载控制器：${target.name}`)
     prefix && (target.prototype.prefix = prefix)
     process.nextTick(() => {
       process.nextTick(() => {
@@ -159,6 +160,7 @@ const DataBase = () => {
 const Middlewares = (mids) => {
   return (target) => {
     injectApp(target, app)
+    console.log(`正在加载中间件：${target.name}`)
     target.prototype.middlewares = mids
     process.nextTick(() => {
       process.nextTick(() => {

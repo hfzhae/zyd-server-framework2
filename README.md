@@ -59,17 +59,18 @@ $ npm run serve
 └───────────────────────┘
 version：1.0.x
 
-正在加载数据库：{db:Mongo,class:Users}
-正在加载模型：Users
-正在加载数据库：{db:Mongo,class:Users}
-正在加载中间件：error
-正在加载数据库：{db:Mongo,class:Users}
-正在启动定时器: handler
-正在加载模型：Users
-正在加载数据库：{db:Mongo,class:Users}
-正在映射地址：post /api/Users/add
-正在映射地址：get /api/Users/get
-start on port:3000
+configs: Index √
+middlewares: Users √
+controller: Users √
+dbs: Mongo √
+middleware: error √
+schedule: handler √
+services: Users √
+router: post /open/api/Users/add √
+router: get /open/api/Users/get √
+models: Users √
+
+start on port: 3000
 
 ┌───────────────┐
 │ start success │

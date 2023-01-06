@@ -9,10 +9,10 @@ module.exports = class Init {
     this.dir = dir
     this.createExamplesConfigFile(dir)
     this.createExamplesControllerFile(dir)
-    this.createExamplesDataBaseFile(dir)
+    // this.createExamplesDataBaseFile(dir)
     this.createExamplesMiddlewareFile(dir)
     this.createExamplesMiddlewareTokenFile(dir)
-    this.createExamplesModelFile(dir)
+    // this.createExamplesModelFile(dir)
     this.createExamplesScheduleFile(dir)
     this.createExamplesServiceFile(dir)
     this.createBabelrcFile(dir)
@@ -255,28 +255,7 @@ import assert from "http-assert"
 @Service()
 class Users {
   async setUsers (ctx) {
-    // mongo数据库执行事物方式
-    const session = await this.db.Mongo.mongoSession(this.db.Mongo.prod)
-    let result = []
-    try {
-      result.push(await this.model.Users.prod.create(
-        [{ name: "张三", age: 25 }],
-        { session }
-      ))
-      result.push(await this.model.Users.prod.findByIdAndUpdate(
-        result._id,
-        { $set: { name: "李四" }},
-        { session }
-      ))
-      assert(result[1], 401, "写库失败，数据回滚")
-      await session.commitTransaction()
-      return result
-    } catch (err) {
-      await session.abortTransaction()
-      assert(false, err.status, err.message)
-    } finally {
-      await session.endSession()
-    }
+    return { success:true }
   }
 }`)
   }

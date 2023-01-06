@@ -237,7 +237,7 @@ class Mongo {
 this.db.Mongo.prod
 this.db.Mongo.test
 ```
->>/dataBase/mssql.js
+>/dataBase/mssql.js
 ```js
 import Sequelize from "sequelize"
 import { DataBase } from "zyd-server-framework2"

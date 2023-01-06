@@ -47,7 +47,7 @@ version：${version}
     })
   }
   start (port = 3000, callBack = () => {
-    console.log("start on port:" + port)
+    console.log(`\nstart on port: ${port}`)
   }) {
     this.koa.listen(port, () => {
       callBack && callBack()

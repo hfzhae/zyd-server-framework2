@@ -8,6 +8,24 @@ const router = new Router()
 const middlewares = []
 let baseUrl = ""
 let app
+const injectApp = (target) => {
+  Object.keys(app).forEach(key => {
+    target.prototype[key] = app[key]
+  })
+}
+const injectClass = (target, className) =>{
+  injectApp(target)
+  if (!app[className]) {
+    app[className] = []
+  }
+  app[className][target.name] = new target()
+  console.log(`\x1B[30m${className}: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+  process.nextTick(() => {
+    process.nextTick(() => {
+      injectApp(target)
+    })
+  })
+}
 /**
  * 工厂
  * @param {*} param0 
@@ -33,18 +51,12 @@ const decorate = ({ method, url = "", router, options = {} }) => {
       url = `/${target.constructor.name}/${url}`
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
       url = baseUrl + url // 添加基础路径
-      console.log(`正在映射地址：${method} ${url}`)
       router[method](url, ...mids)
+      console.log(`\x1B[30mrouter: \x1B[0m\x1B[34m${method} ${url}\x1B[0m \x1B[32m√\x1B[0m`)
     })
   }
 }
 const method = method => (url, options) => decorate({ method, url, router, options })
-const injectApp = (target, app) => {
-  Object.keys(app).forEach(key => {
-    target.prototype[key] = app[key]
-  })
-}
-
 /**
  * 方法装饰器
  */
@@ -61,8 +73,8 @@ const Schedule = (interval) => {
   return (target, property, descriptor) => {
     if (interval) {
       const schedule = require("node-schedule")
-      console.log(`正在启动定时器：${property}`)
       schedule.scheduleJob(interval, () => target[property](app))
+      console.log(`\x1B[30mschedule: \x1B[0m\x1B[34m${property}\x1B[0m \x1B[32m√\x1B[0m`)
     }
   }
 }
@@ -70,101 +82,70 @@ const Schedule = (interval) => {
 /**
  * 类装饰器 
  */
+// 控制器
 const Controller = (prefix) => {
   return (target) => {
-    injectApp(target, app)
-    console.log(`正在加载控制器：${target.name}`)
+    injectApp(target)
     prefix && (target.prototype.prefix = prefix)
+    console.log(`\x1B[30mcontroller: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     process.nextTick(() => {
       process.nextTick(() => {
-        injectApp(target, app)
+        injectApp(target)
       })
     })
   }
 }
+// 服务
 const Service = () => {
   return (target) => {
-    injectApp(target, app)
-    if (!app.services) {
-      app.services = []
-    }
-    console.log(`正在加载服务：${target.name}`)
-    app.services[target.name] = new target()
-    process.nextTick(() => {
-      process.nextTick(() => {
-        injectApp(target, app)
-      })
-    })
+    injectClass(target, "services")
   }
 }
+// 模型
 const Model = () => {
   return (target) => {
     process.nextTick(() => {
-      injectApp(target, app)
-      if (!app.models) {
-        app.models = []
-      }
-      console.log(`正在加载模型：${target.name}`)
-      app.models[target.name] = new target(app)
-      process.nextTick(() => {
-        injectApp(target, app)
-      })
+      injectClass(target, "models")
     })
   }
 }
+// 配置
 const Config = () => {
   return (target) => {
-    injectApp(target, app)
-    if (!app.configs) {
-      app.configs = []
-    }
-    console.log(`正在加载配置：${target.name}`)
-    app.configs[target.name] = new target()
-    process.nextTick(() => {
-      process.nextTick(() => {
-        injectApp(target, app)
-      })
-    })
+    injectClass(target, "configs")
   }
 }
-const Middleware = (mids = []) => {
-  return (target) => {
-    injectApp(target, app)
-    const midObj = new target()
-    mids.forEach(mid => {
-      console.log(`正在加载中间件：${mid}`)
-      middlewares.push(midObj[mid])
-    })
-    process.nextTick(() => {
-      process.nextTick(() => {
-        injectApp(target, app)
-      })
-    })
-  }
-}
+// 数据库
 const DataBase = () => {
   return (target) => {
-    injectApp(target, app)
-    if (!app.dbs) {
-      app.dbs = []
-    }
-    console.log(`正在加载数据库：${target.name}`)
-    app.dbs[target.name] = new target()
+    injectClass(target, "dbs")
+  }
+}
+// 中间件
+const Middleware = (mids = []) => {
+  return (target) => {
+    injectApp(target)
+    const midObj = new target()
+    mids.forEach(mid => {
+      middlewares.push(midObj[mid])
+      console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[34m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
+    })
     process.nextTick(() => {
       process.nextTick(() => {
-        injectApp(target, app)
+        injectApp(target)
       })
     })
   }
 }
+// 中间件
 const Middlewares = (mids) => {
   return (target) => {
-    injectApp(target, app)
-    console.log(`正在加载中间件：${target.name}`)
+    injectApp(target)
     target.prototype.middlewares = mids
+    console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     process.nextTick(() => {
       process.nextTick(() => {
-        injectApp(target, app)
+        injectApp(target)
       })
     })
   }

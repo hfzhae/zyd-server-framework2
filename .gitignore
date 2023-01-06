@@ -9,3 +9,5 @@ model
 main.js
 middleware
 homePage
+jsconfig.json
+.babelrc

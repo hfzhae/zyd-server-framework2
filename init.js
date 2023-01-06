@@ -236,7 +236,7 @@ class Users {
     fs.writeFileSync(dir, `import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("0 0 1 * * *") //crontab格式
-  handler () {
+  handler (app) {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }
 }

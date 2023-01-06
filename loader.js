@@ -26,7 +26,7 @@ const decorate = ({ method, url = "", router, options = {} }) => {
       if (target[property].prototype.auth) {
         mids.push(...target[property].prototype.auth)
       }
-      mids.push(async ctx => { ctx.body = await target[property](ctx) })
+      mids.push(async (ctx, next) => { ctx.body = await target[property](ctx, next) })
       if (!url) {
         url = property // 路由后缀
       }
@@ -62,7 +62,7 @@ const Schedule = (interval) => {
     if (interval) {
       const schedule = require("node-schedule")
       console.log(`正在启动定时器: ${property}`)
-      schedule.scheduleJob(interval, target[property])
+      schedule.scheduleJob(interval, () => target[property](app))
     }
   }
 }

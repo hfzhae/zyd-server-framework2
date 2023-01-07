@@ -83,7 +83,7 @@ const Schedule = (interval) => {
  * 类装饰器 
  */
 // 控制器
-const Controller = (prefix, options) => {
+const Controller = (prefix, options = {}) => {
   return (target) => {
     injectApp(target)
     prefix && (target.prototype.prefix = prefix)

@@ -311,7 +311,6 @@ class Index {
     dir += "/users.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import { Service } from "zyd-server-framework2"
-import assert from "http-assert"
 @Service()
 class Users {
   async setUsers (ctx) {

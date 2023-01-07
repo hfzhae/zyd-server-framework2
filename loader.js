@@ -4,7 +4,6 @@
  * @author: zz
  */
 const Router = require("koa-router")
-const { resolve } = require("path")
 const router = new Router()
 const middlewares = []
 let baseUrl = ""
@@ -156,12 +155,12 @@ const Injectable = ({ folder, conf = {} }) => {
   const path = require("path")
   if (!conf.ignoreDir) {
     conf.ignoreDir = [
-      "/node_modules",
-      "/.git"
+      "./node_modules",
+      "./.git"
     ]
   } else {
-    conf.ignoreDir.push("/node_modules")
-    conf.ignoreDir.push("/.git")
+    conf.ignoreDir.push("./node_modules")
+    conf.ignoreDir.push("./.git")
   }
   conf.ignoreDir = [...new Set(conf.ignoreDir)]
   if (!conf.ignoreFile) {
@@ -171,13 +170,13 @@ const Injectable = ({ folder, conf = {} }) => {
   app = conf.app
   baseUrl = conf.baseUrl || ""
   fs.readdirSync(folder).forEach(filename => {
-    const dirFilePath = `${folder.split(__dirname)[1]}/${filename}`
+    const dirFilePath = path.resolve(folder, filename)
     if (fs.statSync(path.join(folder, filename)).isDirectory()) {
-      if (conf.ignoreDir && conf.ignoreDir.filter(item => item === dirFilePath).length > 0) return
+      if (conf.ignoreDir && conf.ignoreDir.filter(item => path.resolve(folder, item) === dirFilePath).length > 0) return
       Injectable({ folder: `${folder}/${filename}`, conf })
     } else {
       if (filename.split(".").pop() === "js") {
-        if (conf.ignoreFile && conf.ignoreFile.filter(item => item === dirFilePath).length > 0) return
+        if (conf.ignoreFile && conf.ignoreFile.filter(item => path.resolve(folder, item) === dirFilePath).length > 0) return
         require("./" + path.relative(__dirname, folder) + "/" + filename)
       }
     }

@@ -235,7 +235,7 @@ class Users {
     }
     dir += "/utils.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import { Plugin } from "../loader"
+    fs.writeFileSync(dir, `import { Plugin } from "zyd-server-framework2"
 @Plugin()
 class Utils {
   constructor() {

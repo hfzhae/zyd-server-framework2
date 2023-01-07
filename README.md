@@ -381,7 +381,7 @@ this.model.Product.prod.findAll({
 ## Plugin
 > /plugin/utils.js
 ```js
-import { Plugin } from "../loader"
+import { Plugin } from "zyd-server-framework2"
 @Plugin()
 class Utils {
   constructor() {

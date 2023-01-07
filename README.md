@@ -105,7 +105,7 @@ app.start(3000, callBack(){
 ## Class decorators
 name|params|desc
 -|-|-
-Controller|prefix,options|定义控制器对象，prefix(String):前缀路径，options(Object)选项，支持middlewares(Array)定义中间件
+Controller|prefix,options|定义控制器对象，prefix(String):前缀路径，options(Object)选项，支持middlewares(Array)定义类中间件
 Model||定义数据库模型对象
 Config||定义配置对象
 DataBase||定义数据库对象

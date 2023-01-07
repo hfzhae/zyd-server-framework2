@@ -107,6 +107,7 @@ name|params|desc
 -|-|-
 Controller|prefix,options|定义控制器对象，prefix(String):前缀路径，options(Object)选项，支持middlewares(Array)定义类中间件
 Model||定义数据库模型对象
+Plugin||定义插件模型对象
 Config||定义配置对象
 DataBase||定义数据库对象
 Service||定义服务对象
@@ -123,10 +124,11 @@ Schedule|interval|app|定义定时器对象，interval(String)定时器规则cro
 ## Global module
 name|desc|usage
 -|-|-
-config|配置对象数组，对应Config装饰器对象|this.config.Conf
-db|数据库连接对象数组，对应DataBase装饰器对象|this.db.Mongo
-model|模块对象数组，对应Model装饰器对象|this.model.User
-service|服务对象数组，对应Service装饰器对象|this.service.User
+config|配置对象数组，对应Config装饰器对象|this.config
+db|数据库连接对象数组，对应DataBase装饰器对象|this.db
+model|模块对象数组，对应Model装饰器对象|this.model
+plugin|插件对象数组，对应Plugin装饰器对象|this.plugin
+service|服务对象数组，对应Service装饰器对象|this.service
 ## Config
 >/config/conf.js
 ```js
@@ -375,6 +377,63 @@ this.model.Product.prod.findAll({
     id: 1
   }
 })
+```
+## Plugin
+> /plugin/utils.js
+```js
+import { Plugin } from "../loader"
+@Plugin()
+class Utils {
+  constructor() {
+    /**
+     * 日起格式化方法
+     * @param {*} fmt 
+     * @returns 
+     * @example new Date().format("yyyy-MM-dd")
+     */
+    Date.prototype.format = function (fmt) {
+      // 将当前
+      var o = {
+        "M+": this.getMonth() + 1, //月份 
+        "d+": this.getDate(), //日 
+        "h+": this.getHours(), //小时 
+        "m+": this.getMinutes(), //分 
+        "s+": this.getSeconds(), //秒 
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+        "S": this.getMilliseconds() //毫秒 
+      };
+      // 先替换年份
+      if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+      // 再依次替换其他时间日期内容
+      for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+      return fmt;
+    }
+  }
+  /**
+   * 阻塞函数
+   * @param {Number} milliSeconds 毫秒数 
+   */
+  sleep (milliSeconds) {
+    const startTime = new Date().getTime()
+    while (new Date().getTime() < startTime + milliSeconds) { }
+  }
+  getClientIp (req) {//获取客户端ip地址
+    let ip = req.headers['x-forwarded-for'] ||
+      req.ip ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress || '';
+    if (ip.split(',').length > 0) {
+      ip = ip.split(',')[0];
+    }
+    if (ip === "::1") ip = "127.0.0.1"
+    return ip.match(/\d+\.\d+\.\d+\.\d+/)[0];
+  }
+}
+```
+```js
+this.plugin.Utils.sleep(5000)
 ```
 ## Schedule
 >/schedule/index.js

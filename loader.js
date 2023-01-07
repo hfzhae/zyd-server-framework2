@@ -125,6 +125,12 @@ const DataBase = () => {
     injectClass(target, "db")
   }
 }
+// 插件
+const Plugin = () => {
+  return (target) => {
+    injectClass(target, "plugin")
+  }
+}
 // 中间件
 const Middleware = (mids = []) => {
   return (target) => {
@@ -184,6 +190,7 @@ module.exports = {
   Service,
   Model,
   Config,
+  Plugin,
   Middleware,
   DataBase,
   Injectable,

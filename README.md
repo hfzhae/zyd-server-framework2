@@ -105,13 +105,12 @@ app.start(3000, callBack(){
 ## Class decorators
 name|params|desc
 -|-|-
-Controller|prefix|定义控制器对象，prefix(String):前缀路径
+Controller|prefix,options|定义控制器对象，prefix(String):前缀路径，options(Object)选项，支持middlewares(Array)定义中间件
 Model||定义数据库模型对象
 Config||定义配置对象
 DataBase||定义数据库对象
 Service||定义服务对象
 Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
-Middlewares|mids|定义类中间件方法，mids(Array[Function]):中间件方法
 ## Function decorators
 name|params|desc
 -|-|-
@@ -139,11 +138,12 @@ this.config.Index.path
 ## Controller
 >/controller/users.js
 ```js
-import { Post, Get, Controller, Middlewares } from "zyd-server-framework2"
+import { Post, Get, Controller } from "zyd-server-framework2"
 import assert from "http-assert"
 import authToken from "../middleware/authToken"
-@Controller("api") // prefix
-@Middlewares([authToken])
+@Controller("api", {
+  middlewares: [authToken]
+}) // prefix
 class Users {
   @Post("", {
     middlewares: [

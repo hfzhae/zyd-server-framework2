@@ -13,7 +13,7 @@ const injectApp = (target) => {
     target.prototype[key] = app[key]
   })
 }
-const injectClass = (target, className) =>{
+const injectClass = (target, className) => {
   injectApp(target)
   if (!app[className]) {
     app[className] = []
@@ -83,11 +83,15 @@ const Schedule = (interval) => {
  * 类装饰器 
  */
 // 控制器
-const Controller = (prefix) => {
+const Controller = (prefix, options) => {
   return (target) => {
     injectApp(target)
     prefix && (target.prototype.prefix = prefix)
     console.log(`\x1B[30mcontroller: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+    if (options.middlewares) { // 是否配置了中间件
+      target.prototype.middlewares = options.middlewares
+      console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+    }
     process.nextTick(() => {
       process.nextTick(() => {
         injectApp(target)
@@ -137,19 +141,19 @@ const Middleware = (mids = []) => {
     })
   }
 }
-// 中间件
-const Middlewares = (mids) => {
-  return (target) => {
-    injectApp(target)
-    target.prototype.middlewares = mids
-    console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
-    process.nextTick(() => {
-      process.nextTick(() => {
-        injectApp(target)
-      })
-    })
-  }
-}
+// // 中间件
+// const Middlewares = (mids) => {
+//   return (target) => {
+//     injectApp(target)
+//     target.prototype.middlewares = mids
+//     console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+//     process.nextTick(() => {
+//       process.nextTick(() => {
+//         injectApp(target)
+//       })
+//     })
+//   }
+// }
 /**
  * 注入函数
  */
@@ -183,5 +187,4 @@ module.exports = {
   Middleware,
   DataBase,
   Injectable,
-  Middlewares,
 }

@@ -68,11 +68,12 @@ class Index {
     }
     dir += "/users.js"
     if (fs.existsSync(dir)) return
-    fs.writeFileSync(dir, `import { Post, Get, Controller, Middlewares } from "zyd-server-framework2"
+    fs.writeFileSync(dir, `import { Post, Get, Controller } from "zyd-server-framework2"
 import assert from "http-assert"
 import authToken from "../middleware/authToken"
-@Controller("api") // prefix
-@Middlewares([authToken])
+@Controller("api", {
+  middlewares: [authToken]
+}) // prefix
 class Users {
   @Post("", {
     middlewares: [

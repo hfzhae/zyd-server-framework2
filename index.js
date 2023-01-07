@@ -32,8 +32,8 @@ class Zsf {
 │ Powered by zydsoft®   │
 │ zyd-server-framework2 │
 └───────────────────────┘
-version：${version}
-\x1B[0m`)
+\x1B[0m\x1B[30mversion：\x1B[0m\x1B[31m${version}\x1B[0m
+  `)
     this.koa = new Koa()
     //生命周期函数 - init前 zz 2023-1-4
     if (conf && conf.beforeInit) conf.beforeInit(this.koa)

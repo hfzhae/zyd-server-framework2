@@ -6,6 +6,7 @@ dataBase
 schedule
 service
 model
+plugin
 main.js
 middleware
 homePage

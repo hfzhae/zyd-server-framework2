@@ -82,6 +82,13 @@ start on port: 3000
 import { Zsf } from "zyd-server-framework2"
 const app = new Zsf({ 
   baseUrl: "/open", // 基础路径设置
+  ignoreDir: [ // 需要忽略的目录
+    "/.git"
+  ],
+  ignoreFile: [ // 需要忽略的文件
+    "/page/index.js",
+    "/index.js"
+  ],
   beforeInit(koaApp){ // 生命周期函数 - 初始化前
     koaApp.use(require("koa2-cors")()) // 跨域设置
     const session = require("koa-session") // session设置

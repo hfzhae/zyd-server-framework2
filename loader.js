@@ -4,6 +4,7 @@
  * @author: zz
  */
 const Router = require("koa-router")
+const { resolve } = require("path")
 const router = new Router()
 const middlewares = []
 let baseUrl = ""
@@ -19,7 +20,7 @@ const injectClass = (target, className) => {
     app[className] = []
   }
   app[className][target.name] = new target()
-  console.log(`\x1B[30m${className}: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+  console.log(`\x1B[30m${className}: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
   process.nextTick(() => {
     process.nextTick(() => {
       injectApp(target)
@@ -52,7 +53,7 @@ const decorate = ({ method, url = "", router, options = {} }) => {
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
       url = baseUrl + url // 添加基础路径
       router[method](url, ...mids)
-      console.log(`\x1B[30mrouter: \x1B[0m\x1B[34m${method} ${url}\x1B[0m \x1B[32m√\x1B[0m`)
+      console.log(`\x1B[30mrouter: \x1B[0m\x1B[36m${method} ${url}\x1B[0m \x1B[32m√\x1B[0m`)
     })
   }
 }
@@ -74,7 +75,7 @@ const Schedule = (interval) => {
     if (interval) {
       const schedule = require("node-schedule")
       schedule.scheduleJob(interval, () => target[property](app))
-      console.log(`\x1B[30mschedule: \x1B[0m\x1B[34m${property}\x1B[0m \x1B[32m√\x1B[0m`)
+      console.log(`\x1B[30mschedule: \x1B[0m\x1B[36m${property}\x1B[0m \x1B[32m√\x1B[0m`)
     }
   }
 }
@@ -87,10 +88,10 @@ const Controller = (prefix, options = {}) => {
   return (target) => {
     injectApp(target)
     prefix && (target.prototype.prefix = prefix)
-    console.log(`\x1B[30mcontroller: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+    console.log(`\x1B[30mcontroller: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     if (options.middlewares) { // 是否配置了中间件
       target.prototype.middlewares = options.middlewares
-      console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+      console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     }
     process.nextTick(() => {
       process.nextTick(() => {
@@ -138,7 +139,7 @@ const Middleware = (mids = []) => {
     const midObj = new target()
     mids.forEach(mid => {
       middlewares.push(midObj[mid])
-      console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[34m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
+      console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[36m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
     })
     process.nextTick(() => {
       process.nextTick(() => {
@@ -147,32 +148,36 @@ const Middleware = (mids = []) => {
     })
   }
 }
-// // 中间件
-// const Middlewares = (mids) => {
-//   return (target) => {
-//     injectApp(target)
-//     target.prototype.middlewares = mids
-//     console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[34m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
-//     process.nextTick(() => {
-//       process.nextTick(() => {
-//         injectApp(target)
-//       })
-//     })
-//   }
-// }
 /**
  * 注入函数
  */
 const Injectable = ({ folder, conf = {} }) => {
   const fs = require("fs")
   const path = require("path")
+  if (!conf.ignoreDir) {
+    conf.ignoreDir = [
+      "/node_modules",
+      "/.git"
+    ]
+  } else {
+    conf.ignoreDir.push("/node_modules")
+    conf.ignoreDir.push("/.git")
+  }
+  conf.ignoreDir = [...new Set(conf.ignoreDir)]
+  if (!conf.ignoreFile) {
+    conf.ignoreFile = []
+  }
+  conf.ignoreFile = [...new Set(conf.ignoreFile)]
   app = conf.app
   baseUrl = conf.baseUrl || ""
   fs.readdirSync(folder).forEach(filename => {
-    if (fs.statSync(path.join(folder, filename)).isDirectory() && filename !== "node_modules") {
+    const dirFilePath = `${folder.split(__dirname)[1]}/${filename}`
+    if (fs.statSync(path.join(folder, filename)).isDirectory()) {
+      if (conf.ignoreDir && conf.ignoreDir.filter(item => item === dirFilePath).length > 0) return
       Injectable({ folder: `${folder}/${filename}`, conf })
     } else {
       if (filename.split(".").pop() === "js") {
+        if (conf.ignoreFile && conf.ignoreFile.filter(item => item === dirFilePath).length > 0) return
         require("./" + path.relative(__dirname, folder) + "/" + filename)
       }
     }

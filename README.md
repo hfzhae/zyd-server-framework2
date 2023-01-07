@@ -112,14 +112,21 @@ DataBase||定义数据库对象
 Service||定义服务对象
 Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
 ## Function decorators
-name|params|desc
+name|decorators params|function params|desc
+-|-|-|-
+Get|url,options|ctx,next|定义Get方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件，ctx(koa.context)，next(koa.next)
+Put|url,options|ctx,next|定义Put方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件，ctx(koa.context)，next(koa.next)
+Del|url,options|ctx,next|定义Del方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件，ctx(koa.context)，next(koa.next)
+Post|url,options|ctx,next|定义Post方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件，ctx(koa.context)，next(koa.next)
+Patch|url,options|ctx,next|定义Patch方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件，ctx(koa.context)，next(koa.next)
+Schedule|interval|app|定义定时器对象，interval(String)定时器规则crontab格式，app全局模块，详见Global module
+## Global module
+name|desc|usage
 -|-|-
-Get|url,options|定义Get方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Put|url,options|定义Put方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Del|url,options|定义Del方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Post|url,options|定义Post方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Patch|url,options|定义Patch方法路由，url(String)后置路径，options(Object)选项，支持middlewares(Array)定义中间件
-Schedule|interval|定义定时器对象，interval(String)定时器规则，crontab格式
+config|配置对象数组，对应Config装饰器对象|this.config.Conf
+db|数据库连接对象数组，对应DataBase装饰器对象|this.db.Mongo
+model|模块对象数组，对应Model装饰器对象|this.model.User
+service|服务对象数组，对应Service装饰器对象|this.service.User
 ## Config
 >/config/conf.js
 ```js
@@ -179,7 +186,7 @@ class Product {
   }
 }
 ```
-[http://localhost:3000/api/product/query](http://localhost:3000/api/product/query)
+[http://localhost:3000/api/Product/query](http://localhost:3000/api/Product/query)
 ## DataBase
 >/dataBase/mongo.js
 ```js
@@ -339,10 +346,10 @@ class Users {
 }
 ```
 ```js
-this.model.Users.prod
+this.model.Users.prod.find()
 ```
->/model/product.js
 ```js
+>/model/product.js
 import { Model } from "zyd-server-framework2"
 import Sequelize from "sequelize"
 @Model()
@@ -363,7 +370,11 @@ class Product {
 }
 ```
 ```js
-this.model.Product.prod
+this.model.Product.prod.findAll({
+  where: {
+    id: 1
+  }
+})
 ```
 ## Schedule
 >/schedule/index.js

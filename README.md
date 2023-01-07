@@ -106,10 +106,10 @@ app.start(3000, callBack(){
 name|params|desc
 -|-|-
 Controller|prefix,options|定义控制器对象，prefix(String):前缀路径，options(Object)选项，支持middlewares(Array)定义类中间件
-Model||定义数据库模型对象
-Plugin||定义插件模型对象
 Config||定义配置对象
 DataBase||定义数据库对象
+Model||定义数据库模型对象
+Plugin||定义插件模型对象
 Service||定义服务对象
 Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
 ## Function decorators

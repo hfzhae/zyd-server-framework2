@@ -39,7 +39,9 @@ class Zsf {
     if (conf && conf.beforeInit) conf.beforeInit(this.koa)
     this.koa.use(require("koa-bodyparser")())
     const { router, middlewares } = Injectable({ folder: resolve(dir, "."), conf: { ...conf, app: this } })
-    this.koa.use(...middlewares)
+    middlewares.forEach(mid => {
+      this.koa.use(mid)
+    })
     this.koa.use(router.routes())
     //生命周期函数 - init后 zz 2023-1-4
     process.nextTick(() => {

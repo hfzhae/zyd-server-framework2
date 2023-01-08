@@ -89,7 +89,12 @@ const Controller = (prefix, options = {}) => {
     prefix && (target.prototype.prefix = prefix)
     console.log(`\x1B[30mcontroller: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     if (options.middlewares) { // 是否配置了中间件
-      target.prototype.middlewares = options.middlewares
+      if (!target.prototype.middlewares) {
+        target.prototype.middlewares = []
+      }
+      options.middlewares.forEach(mid => {
+        target.prototype.middlewares.push(mid(app))
+      })
       console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     }
     process.nextTick(() => {
@@ -137,7 +142,7 @@ const Middleware = (mids = []) => {
     injectApp(target)
     const midObj = new target()
     mids.forEach(mid => {
-      middlewares.push(midObj[mid])
+      middlewares.push(midObj[mid](app))
       console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[36m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
     })
     process.nextTick(() => {
@@ -150,7 +155,7 @@ const Middleware = (mids = []) => {
 /**
  * 注入函数
  */
-const Injectable = ({ folder, conf = {} }) => {
+const Injectable = ({ folder, rootFolder, conf = {} }) => {
   const fs = require("fs")
   const path = require("path")
   if (!conf.ignoreDir) {
@@ -172,11 +177,11 @@ const Injectable = ({ folder, conf = {} }) => {
   fs.readdirSync(folder).forEach(filename => {
     const dirFilePath = path.resolve(folder, filename)
     if (fs.statSync(path.join(folder, filename)).isDirectory()) {
-      if (conf.ignoreDir && conf.ignoreDir.filter(item => path.resolve(folder, item) === dirFilePath).length > 0) return
-      Injectable({ folder: `${folder}/${filename}`, conf })
+      if (conf.ignoreDir && conf.ignoreDir.filter(item => path.resolve(rootFolder, item) === dirFilePath).length > 0) return
+      Injectable({ folder: `${folder}/${filename}`, rootFolder, conf })
     } else {
       if (filename.split(".").pop() === "js") {
-        if (conf.ignoreFile && conf.ignoreFile.filter(item => path.resolve(folder, item) === dirFilePath).length > 0) return
+        if (conf.ignoreFile && conf.ignoreFile.filter(item => path.resolve(rootFolder, item) === dirFilePath).length > 0) return
         require("./" + path.relative(__dirname, folder) + "/" + filename)
       }
     }

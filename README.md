@@ -299,33 +299,37 @@ class Middlewares {
   constructor() {
     this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中
   }
-  async error (ctx, next) {
-    try {
-      await next()
-    } catch (err) {
-      console.log(err)
-      const code = err.status || 500
-      const message = err.response && err.response.data || err.message
-      ctx.body = {
-        code,
-        message
+  error (app) { // 需要柯里化
+    return async (ctx, next) => {
+      try {
+        await next()
+      } catch (err) {
+        console.log(err)
+        const code = err.status || 500
+        const message = err.response && err.response.data || err.message
+        ctx.body = {
+          code,
+          message
+        }
+        ctx.status = code // 200
       }
-      ctx.status = code // 200
     }
   }
-  favicon (ctx, next) {
-    if (ctx.path === "/favicon.ico") {
-      ctx.body = ""
-      return
-    }
-    await next()
+  favicon (app) { // 需要柯里化
+    return async (ctx, next) {
+      if (ctx.path === "/favicon.ico") {
+        ctx.body = ""
+        return
+      }
+      await next()
+    } 
   }
 }
 ```
 >/middleware/authToken.js
 ```js
 import assert from "http-assert"
-export default async (ctx, next) => {
+export default app => async (ctx, next) => { // 需要柯里化
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()

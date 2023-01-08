@@ -168,18 +168,20 @@ class Mongo {
   "error",
 ])
 class Middlewares {
-  async error (ctx, next) {
-    try {
-      await next()
-    } catch (err) {
-      console.log(err)
-      const code = err.status || 500
-      const message = err.response && err.response.data || err.message
-      ctx.body = {
-        code,
-        message
+  error (app) {
+    return async (ctx, next) => {
+      try {
+        await next()
+      } catch (err) {
+        console.log(err)
+        const code = err.status || 500
+        const message = err.response && err.response.data || err.message
+        ctx.body = {
+          code,
+          message
+        }
+        ctx.status = code // 200
       }
-      ctx.status = code // 200
     }
   }
 }`)
@@ -193,7 +195,7 @@ class Middlewares {
     dir += "/authToken.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import assert from "http-assert"
-export default async (ctx, next) => {
+export default app => async (ctx, next) => {
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()

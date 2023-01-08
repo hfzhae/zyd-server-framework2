@@ -316,7 +316,7 @@ class Middlewares {
     }
   }
   favicon (app) { // 需要柯里化
-    return async (ctx, next) {
+    return async (ctx, next) => {
       if (ctx.path === "/favicon.ico") {
         ctx.body = ""
         return

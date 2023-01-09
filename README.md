@@ -325,7 +325,7 @@ class Middlewares {
 >/middleware/authToken.js
 ```js
 import assert from "http-assert"
-export default async (ctx, next) => { 
+export default async function (ctx, next) { // 此处不能使用尖头函数，否则无法通过this获取全局模块数组
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()

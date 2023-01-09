@@ -41,9 +41,6 @@ const decorate = ({ method, url = "", router, options = {} }) => {
       if (options.middlewares) { // 是否配置了中间件
         mids.push(...options.middlewares)
       }
-      if (target[property].prototype.auth) {
-        mids.push(...target[property].prototype.auth)
-      }
       mids.push(async (ctx, next) => { ctx.body = await target[property](ctx, next) })
       if (!url) {
         url = property // 路由后缀
@@ -73,8 +70,14 @@ const Schedule = (interval) => {
   return (target, property, descriptor) => {
     if (interval) {
       const schedule = require("node-schedule")
-      schedule.scheduleJob(interval, () => target[property](app))
+      schedule.scheduleJob(interval, () => target[property]())
       console.log(`\x1B[30mschedule: \x1B[0m\x1B[36m${property}\x1B[0m \x1B[32m√\x1B[0m`)
+      process.nextTick(() => {
+        process.nextTick(() => {
+          injectApp(target.constructor)
+        })
+      })
+
     }
   }
 }
@@ -93,7 +96,13 @@ const Controller = (prefix, options = {}) => {
         target.prototype.middlewares = []
       }
       options.middlewares.forEach(mid => {
-        target.prototype.middlewares.push(mid(app))
+        mid.prototype[mid.name] = mid
+        target.prototype.middlewares.push(async (ctx, next) => { ctx.body = await mid.prototype[[mid.name]](ctx, next) })
+        process.nextTick(() => {
+          process.nextTick(() => {
+            injectApp(mid)
+          })
+        })
       })
       console.log(`\x1B[30mmiddlewares: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     }
@@ -142,7 +151,7 @@ const Middleware = (mids = []) => {
     injectApp(target)
     const midObj = new target()
     mids.forEach(mid => {
-      middlewares.push(midObj[mid](app))
+      middlewares.push(async (ctx, next) => midObj[mid](ctx, next))
       console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[36m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
     })
     process.nextTick(() => {

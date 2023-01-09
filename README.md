@@ -297,39 +297,35 @@ import mount from "koa-mount"
 ])
 class Middlewares {
   constructor() {
-    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中
+    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中，需要柯里化
   }
-  error (app) { // 需要柯里化
-    return async (ctx, next) => {
-      try {
-        await next()
-      } catch (err) {
-        console.log(err)
-        const code = err.status || 500
-        const message = err.response && err.response.data || err.message
-        ctx.body = {
-          code,
-          message
-        }
-        ctx.status = code // 200
+  async error (ctx, next) => {
+    try {
+      await next()
+    } catch (err) {
+      console.log(err)
+      const code = err.status || 500
+      const message = err.response && err.response.data || err.message
+      ctx.body = {
+        code,
+        message
       }
+      ctx.status = code // 200
     }
   }
-  favicon (app) { // 需要柯里化
-    return async (ctx, next) => {
-      if (ctx.path === "/favicon.ico") {
-        ctx.body = ""
-        return
-      }
-      await next()
-    } 
-  }
+  async favicon (ctx, next) => {
+    if (ctx.path === "/favicon.ico") {
+      ctx.body = ""
+      return
+    }
+    await next()
+  } 
 }
 ```
 >/middleware/authToken.js
 ```js
 import assert from "http-assert"
-export default app => async (ctx, next) => { // 需要柯里化
+export default async (ctx, next) => { // 需要柯里化
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()
@@ -342,7 +338,7 @@ import mongoose from "mongoose"
 import { Model } from "zyd-server-framework2"
 @Model()
 class Users {
-  constructor(app) {
+  constructor() {
     const schema = new mongoose.Schema({
       name: { type: String },
       age: { type: Number }
@@ -452,7 +448,7 @@ this.plugin.Utils.sleep(5000)
 import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("0 0 1 * * *") //crontab格式
-  handler (app) {
+  handler () {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }
 }

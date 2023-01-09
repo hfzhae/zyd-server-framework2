@@ -168,20 +168,18 @@ class Mongo {
   "error",
 ])
 class Middlewares {
-  error (app) {
-    return async (ctx, next) => {
-      try {
-        await next()
-      } catch (err) {
-        console.log(err)
-        const code = err.status || 500
-        const message = err.response && err.response.data || err.message
-        ctx.body = {
-          code,
-          message
-        }
-        ctx.status = code // 200
+  async error (ctx, next) {
+    try {
+      await next()
+    } catch (err) {
+      console.log(err)
+      const code = err.status || 500
+      const message = err.response && err.response.data || err.message
+      ctx.body = {
+        code,
+        message
       }
+      ctx.status = code // 200
     }
   }
 }`)
@@ -195,7 +193,7 @@ class Middlewares {
     dir += "/authToken.js"
     if (fs.existsSync(dir)) return
     fs.writeFileSync(dir, `import assert from "http-assert"
-export default app => async (ctx, next) => {
+export default async (ctx, next) => {
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()
@@ -213,7 +211,7 @@ export default app => async (ctx, next) => {
 import { Model } from "zyd-server-framework2"
 @Model()
 class Users {
-  constructor(app) {
+  constructor() {
     const schema = new mongoose.Schema({
       name: { type: String },
       age: { type: Number }
@@ -298,7 +296,7 @@ class Utils {
     fs.writeFileSync(dir, `import { Schedule } from "zyd-server-framework2"
 class Index {
   @Schedule("0 0 1 * * *") //crontab格式
-  handler (app) {
+  handler () {
     console.log("这是一个定时任务 " + new Date().toLocaleString())
   }
 }

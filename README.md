@@ -297,7 +297,7 @@ import mount from "koa-mount"
 ])
 class Middlewares {
   constructor() {
-    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中，需要柯里化
+    this.homePage = mount('/homePage', koaStatic('./homePage')) // 静态页面配置在构造器中
   }
   async error (ctx, next) => {
     try {
@@ -325,7 +325,7 @@ class Middlewares {
 >/middleware/authToken.js
 ```js
 import assert from "http-assert"
-export default async (ctx, next) => { // 需要柯里化
+export default async (ctx, next) => { 
   assert(ctx.header.token, 408, "invalid token")
   ctx.state.partnerId = "xxxxxx"
   await next()

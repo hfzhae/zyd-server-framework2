@@ -7,6 +7,8 @@
 
 </p>
 
+使用babel方案支持ES Module规范，因此创建项目后，在运行前请在项目中配置.babelrc文件。
+
 ## Installation
 ```
 $ npm install -s zyd-server-framework2

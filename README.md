@@ -393,7 +393,7 @@ import { Plugin } from "zyd-server-framework2"
 class Utils {
   constructor() {
     /**
-     * 日起格式化方法
+     * 日期格式化方法
      * @param {*} fmt 
      * @returns 
      * @example new Date().format("yyyy-MM-dd")

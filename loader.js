@@ -3,65 +3,59 @@
  * @since 2022-1-2
  * @author: zz
  */
-const Router = require("koa-router")
-const router = new Router()
+const _router = require("koa-router")
+const router = new _router()
 const middlewares = []
-let baseUrl = ""
-let app
-const injectApp = (target) => {
-  Object.keys(app).forEach(key => {
-    target.prototype[key] = app[key]
-  })
-}
-const injectClass = (target, className) => {
-  injectApp(target)
-  if (!app[className]) {
-    app[className] = []
-  }
-  app[className][target.name] = new target()
-  console.log(`\x1B[30m${className}: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
-  process.nextTick(() => {
-    process.nextTick(() => {
-      injectApp(target)
-    })
-  })
+let _conf = {}
+const _injectApp = (target) => {
+  Object.keys(_conf.app).forEach(key => { target.prototype[key] = _conf.app[key] })
 }
 /**
  * 工厂
- * @param {*} param0 
- * @returns 
  */
-const decorate = ({ method, url = "", router, options = {} }) => {
+const _functionDecorate = ({ method, url = "", router, options = {} }) => { // 方法
   return (target, property, descriptor) => {
     process.nextTick(() => {
       const mids = []
-      if (target.middlewares) {
-        mids.push(...target.middlewares)
-      }
-      if (options.middlewares) { // 是否配置了中间件
-        mids.push(...options.middlewares)
-      }
+      target.middlewares && mids.push(...target.middlewares)
+      options.middlewares && mids.push(...options.middlewares) // 是否配置了中间件
       mids.push(async (ctx, next) => { ctx.body = await target[property](ctx, next) })
       if (!url) {
         url = property // 路由后缀
       }
       url = `/${target.constructor.name}/${url}`
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
-      url = baseUrl + url // 添加基础路径
+      url = _conf.baseUrl + url // 添加基础路径
       router[method](url, ...mids)
       console.log(`\x1B[30mrouter: \x1B[0m\x1B[36m${method} ${url}\x1B[0m \x1B[32m√\x1B[0m`)
     })
   }
 }
-const method = method => (url, options) => decorate({ method, url, router, options })
+const _classDecorate = moduleName => { // 类
+  return target => {
+    _injectApp(target)
+    if (!_conf.app[moduleName]) {
+      _conf.app[moduleName] = []
+    }
+    _conf.app[moduleName][target.name] = new target()
+    console.log(`\x1B[30m${moduleName}: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
+    process.nextTick(() => {
+      process.nextTick(() => {
+        _injectApp(target)
+      })
+    })
+  }
+}
+const _injectFunction = method => (url, options) => _functionDecorate({ method, url, router, options })
+const _injectClass = moduleName => () => _classDecorate(moduleName)
 /**
  * 方法装饰器
  */
-const Get = method("get")
-const Put = method("put")
-const Del = method("del")
-const Post = method("post")
-const Patch = method("patch")
+const Get = _injectFunction("get")
+const Put = _injectFunction("put")
+const Del = _injectFunction("del")
+const Post = _injectFunction("post")
+const Patch = _injectFunction("patch")
 /**
  * 定时装饰器
  * @param {String} interval crontab格式
@@ -74,21 +68,18 @@ const Schedule = (interval) => {
       console.log(`\x1B[30mschedule: \x1B[0m\x1B[36m${property}\x1B[0m \x1B[32m√\x1B[0m`)
       process.nextTick(() => {
         process.nextTick(() => {
-          injectApp(target.constructor)
+          _injectApp(target.constructor)
         })
       })
-
     }
   }
 }
-
 /**
  * 类装饰器 
  */
-// 控制器
-const Controller = (prefix, options = {}) => {
+const Controller = (prefix, options = {}) => { // 控制器
   return (target) => {
-    injectApp(target)
+    _injectApp(target)
     prefix && (target.prototype.prefix = prefix)
     console.log(`\x1B[30mcontroller: \x1B[0m\x1B[36m${target.name}\x1B[0m \x1B[32m√\x1B[0m`)
     if (options.middlewares) { // 是否配置了中间件
@@ -100,7 +91,7 @@ const Controller = (prefix, options = {}) => {
         target.prototype.middlewares.push(async (ctx, next) => { ctx.body = await mid.prototype[[mid.name]](ctx, next) })
         process.nextTick(() => {
           process.nextTick(() => {
-            injectApp(mid)
+            _injectApp(mid)
           })
         })
       })
@@ -108,47 +99,19 @@ const Controller = (prefix, options = {}) => {
     }
     process.nextTick(() => {
       process.nextTick(() => {
-        injectApp(target)
+        _injectApp(target)
       })
     })
   }
 }
-// 服务
-const Service = () => {
+const Service = _injectClass("service") // 服务
+const Model = _injectClass("model") // 模型
+const Config = _injectClass("config") // 配置
+const DataBase = _injectClass("db") // 数据库
+const Plugin = _injectClass("plugin") // 插件
+const Middleware = (mids = []) => { // 中间件
   return (target) => {
-    injectClass(target, "service")
-  }
-}
-// 模型
-const Model = () => {
-  return (target) => {
-    process.nextTick(() => {
-      injectClass(target, "model")
-    })
-  }
-}
-// 配置
-const Config = () => {
-  return (target) => {
-    injectClass(target, "config")
-  }
-}
-// 数据库
-const DataBase = () => {
-  return (target) => {
-    injectClass(target, "db")
-  }
-}
-// 插件
-const Plugin = () => {
-  return (target) => {
-    injectClass(target, "plugin")
-  }
-}
-// 中间件
-const Middleware = (mids = []) => {
-  return (target) => {
-    injectApp(target)
+    _injectApp(target)
     const midObj = new target()
     mids.forEach(mid => {
       middlewares.push(async (ctx, next) => midObj[mid](ctx, next))
@@ -156,7 +119,7 @@ const Middleware = (mids = []) => {
     })
     process.nextTick(() => {
       process.nextTick(() => {
-        injectApp(target)
+        _injectApp(target)
       })
     })
   }
@@ -168,21 +131,15 @@ const Injectable = ({ folder, rootFolder, conf = {} }) => {
   const fs = require("fs")
   const path = require("path")
   if (!conf.ignoreDir) {
-    conf.ignoreDir = [
-      "./node_modules",
-      "./.git"
-    ]
+    conf.ignoreDir = ["./node_modules", "./.git"]
   } else {
     conf.ignoreDir.push("./node_modules")
     conf.ignoreDir.push("./.git")
   }
   conf.ignoreDir = [...new Set(conf.ignoreDir)]
-  if (!conf.ignoreFile) {
-    conf.ignoreFile = []
-  }
+  !conf.ignoreFile && (conf.ignoreFile = [])
   conf.ignoreFile = [...new Set(conf.ignoreFile)]
-  app = conf.app
-  baseUrl = conf.baseUrl || ""
+  _conf = conf
   fs.readdirSync(folder).forEach(filename => {
     const dirFilePath = path.resolve(folder, filename)
     if (fs.statSync(path.join(folder, filename)).isDirectory()) {

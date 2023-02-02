@@ -32,7 +32,7 @@ class Zsf {
 │ Powered by zydsoft®   │
 │ zyd-server-framework2 │
 └───────────────────────┘
-\x1B[0m\x1B[30mversion：\x1B[0m\x1B[31m${version}\x1B[0m
+\x1B[0m\x1B[37mversion：\x1B[0m\x1B[31m${version}\x1B[0m
   `)
     this.koa = new Koa()
     //生命周期函数 - init前 zz 2023-1-4
@@ -50,15 +50,15 @@ class Zsf {
     })
   }
   start (port = 3000, callBack = () => {
-    console.log(`\nstart on port: ${port}`)
+    console.log(`\n\x1B[33m\x1B[1mstart on port: ${port}\x1B[0m`)
   }) {
     this.koa.listen(port, () => {
       callBack && callBack()
-      console.log(`\x1B[1m\x1B[32m
+      console.log(`\x1B[32m
 ┌───────────────┐
 │ start success │
 └───────────────┘
-\x1B[0m\x1B[0m`)
+\x1B[0m`)
     })
   }
 }

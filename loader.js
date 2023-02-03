@@ -24,6 +24,8 @@ const _functionDecorate = ({ method, url = "", router, options = {} }) => { // �
         url = `/${target.constructor.name}/${property}` // 路由后缀
       } else if (url === "/") {
         url = `/${target.constructor.name}`
+      } else {
+        url = `/${target.constructor.name}/${url.split("/").filter(item => item).join("/")}`
       }
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
       url = _conf.baseUrl + url // 添加基础路径

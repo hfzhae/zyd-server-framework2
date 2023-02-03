@@ -191,13 +191,13 @@ class Users {
 import { Get, Controller } from "zyd-server-framework2"
 @Controller("api") // prefix
 class Product {
-  @Get()
+  @Get("/") // 路由后缀为：/ 时，直接使用对象定义路由
   async query (ctx) {
     return await this.service.Product.query(ctx)
   }
 }
 ```
-[http://localhost:3000/api/Product/query](http://localhost:3000/api/Product/query)
+[http://localhost:3000/api/Product](http://localhost:3000/api/Product/query)
 ## DataBase
 >/dataBase/mongo.js
 ```js

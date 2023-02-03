@@ -21,9 +21,10 @@ const _functionDecorate = ({ method, url = "", router, options = {} }) => { // �
       options.middlewares && mids.push(...options.middlewares) // 是否配置了中间件
       mids.push(async (ctx, next) => { ctx.body = await target[property](ctx, next) })
       if (!url) {
-        url = property // 路由后缀
+        url = `/${target.constructor.name}/${property}` // 路由后缀
+      } else if (url === "/") {
+        url = `/${target.constructor.name}`
       }
-      url = `/${target.constructor.name}/${url}`
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
       url = _conf.baseUrl + url // 添加基础路径
       router[method](url, ...mids)

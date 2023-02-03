@@ -18,7 +18,15 @@ const _functionDecorate = ({ method, url = "", router, options = {} }) => { // �
     process.nextTick(() => {
       const mids = []
       target.middlewares && mids.push(...target.middlewares)
-      options.middlewares && mids.push(...options.middlewares) // 是否配置了中间件
+      options.middlewares && options.middlewares.forEach(mid => {// 是否配置了中间件
+        mid.prototype[mid.name] = mid
+        mids.push(async (ctx, next) => await mid.prototype[[mid.name]](ctx, next))
+        process.nextTick(() => {
+          process.nextTick(() => {
+            _injectApp(mid)
+          })
+        })
+      })
       mids.push(async (ctx, next) => { ctx.body = await target[property](ctx, next) })
       if (!url) {
         url = `/${target.constructor.name}/${property}` // 路由后缀
@@ -91,7 +99,7 @@ const Controller = (prefix, options = {}) => { // 控制器
       }
       options.middlewares.forEach(mid => {
         mid.prototype[mid.name] = mid
-        target.prototype.middlewares.push(async (ctx, next) => { ctx.body = await mid.prototype[[mid.name]](ctx, next) })
+        target.prototype.middlewares.push(async (ctx, next) => await mid.prototype[[mid.name]](ctx, next))
         process.nextTick(() => {
           process.nextTick(() => {
             _injectApp(mid)

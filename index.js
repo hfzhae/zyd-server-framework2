@@ -25,7 +25,7 @@ const Koa = require("koa")
 const version = require('./package.json').version
 class Zsf {
   constructor(conf = {}) {
-    const dir = __dirname.split("/node_modules/zyd-server-framework2")[0]
+    const dir = process.cwd()
     new Init(dir)
     console.log(`\x1B[33m
 ┌───────────────────────┐

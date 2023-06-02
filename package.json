@@ -1,10 +1,11 @@
 {
   "name": "zyd-server-framework2",
-  "version": "1.0.46",
+  "version": "1.0.47",
   "description": "基于nodejs,koa的server端框架，使用装饰器构建",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --exec babel-node main.js"
+    "serve": "nodemon --exec babel-node main.js",
+    "build": "node build.js"
   },
   "keywords": [
     "node",
@@ -23,6 +24,7 @@
     "koa": "^2.14.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^12.0.0",
-    "node-schedule": "^2.1.0"
+    "node-schedule": "^2.1.0",
+    "zyd-server-build2": "^1.0.11"
   }
 }

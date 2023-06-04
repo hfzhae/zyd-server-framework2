@@ -125,8 +125,10 @@ const Middleware = (mids = []) => { // 中间件
     _injectApp(target)
     const midObj = new target()
     mids.forEach(mid => {
-      middlewares.push(async (ctx, next) => midObj[mid](ctx, next))
-      console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[36m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
+      if (midObj[mid]) {
+        middlewares.push(async (ctx, next) => midObj[mid](ctx, next))
+        console.log(`\x1B[30mmiddleware: \x1B[0m\x1B[36m${mid}\x1B[0m \x1B[32m√\x1B[0m`)
+      }
     })
     process.nextTick(() => {
       process.nextTick(() => {

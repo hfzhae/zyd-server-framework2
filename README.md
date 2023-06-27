@@ -539,7 +539,10 @@ export default () => {
 }
 ```
 ```js
+import { Post, Controller } from "zyd-server-framework2"
 import authToken from "../../decorators/authToken"
+@Controller()
+class Doctor {
   @Post("/")
   @authToken() // token鉴权
   add (ctx) {
@@ -549,7 +552,7 @@ import authToken from "../../decorators/authToken"
     const { database, partnerId } = ctx.state
     return this.service.Doctor.add({ partnerId, database, data })
   }
-
+}
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

@@ -1,6 +1,6 @@
 {
   "name": "zyd-server-framework2",
-  "version": "1.0.49",
+  "version": "1.0.51",
   "description": "基于nodejs,koa的server端框架，使用装饰器构建",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   ],
   "author": "zhangzheng",
   "license": "MIT",
-  "homepage": "https://www.npmjs.com/package/zyd-server-framework2",
+  "homepage": "https://github.com/hfzhae/zyd-server-framework2",
   "dependencies": {
     "@babel/cli": "^7.20.7",
     "@babel/core": "^7.20.7",

@@ -38,6 +38,8 @@ const _functionDecorate = ({ method, url = "", router, options = {} }) => { // �
       target.prefix && (url = `/${target.prefix}${url}`) // 路由前缀
       url = _conf.baseUrl + url // 添加基础路径
       router[method](url, ...mids)
+      target[property].method = method
+      target[property].url = url
       console.log(`\x1B[30mrouter: \x1B[0m\x1B[36m${method} ${url}\x1B[0m \x1B[32m√\x1B[0m`)
     })
   }

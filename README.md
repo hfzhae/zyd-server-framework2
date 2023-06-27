@@ -121,6 +121,7 @@ Model||定义数据库模型对象
 Plugin||定义插件模型对象
 Service||定义服务对象
 Middleware|mids|定义全局中间件对象，mids(Array[Class]):中间件对象
+Decorators||自定义装饰器
 ## Function decorators
 name|decorators params|function params|desc
 -|-|-|-
@@ -507,6 +508,48 @@ class Product {
 ```
 ```js
 this.service.Product.query(ctx)
+```
+## Decorators
+>/decorators/authToken.js
+```js
+import assert from "http-assert"
+import jwt from "jsonwebtoken"
+/**
+ * 鉴权装饰器 2023-6-25 zz
+ */
+export default () => {
+  return (target, property, descriptor) => {
+    const oldValue = descriptor.value
+    descriptor.value = function () {
+      const ctx = arguments[0]
+      const token = String(ctx.req.headers.authorization || "").split(" ").pop()
+      const { jwtKey } = target.config.Global
+      assert(jwtKey, 401, "缺少jwtKey")
+      assert(token, 401, "缺少token")
+      const { partnerId } = jwt.verify(token, jwtKey + ctx.state.experiment, (err, decode) => {
+        err && assert(false, 401, err.message)
+        return decode
+      })
+      assert(partnerId, 401, "无效的token")
+      ctx.state.partnerId = partnerId
+      return oldValue.apply(null, arguments)
+    }
+    return descriptor
+  }
+}
+```
+```js
+import authToken from "../../decorators/authToken"
+  @Post("/")
+  @authToken() // token鉴权
+  add (ctx) {
+    const data = ctx.request.body
+    assert(data, 400, "缺少data")
+    assert(data.phone || data.wxopenid || data.email, 400, '缺少phone 或 wxopenid 或 email')
+    const { database, partnerId } = ctx.state
+    return this.service.Doctor.add({ partnerId, database, data })
+  }
+
 ```
 ## License
 [MIT](https://github.com/hfzhae/zyd-server-framework/blob/master/LICENSE)

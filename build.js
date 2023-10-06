@@ -15,6 +15,8 @@ require("zyd-server-build2")({
     "./plugin",
     "./schedule",
     "./service",
+    "./decorators",
+    "./build"
     // "./publicCode/config",
   ],
   ignoreFile: [

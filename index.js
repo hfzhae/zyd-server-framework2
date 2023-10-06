@@ -48,6 +48,7 @@ class Zsf {
     process.nextTick(() => {
       if (conf && conf.afterInit) conf.afterInit(this.koa)
     })
+    conf.Decorators && (this.Decorators = conf.Decorators)
   }
   start (port = 3000, callBack = () => {
     console.log(`\n\x1B[33m\x1B[1mstart on port: ${port}\x1B[0m`)

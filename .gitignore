@@ -6,6 +6,7 @@ authenticator
 dataBase
 schedule
 service
+decorators
 model
 plugin
 main.js

@@ -37,7 +37,8 @@ class Zsf {
     this.koa = new Koa()
     //生命周期函数 - init前 zz 2023-1-4
     if (conf && conf.beforeInit) conf.beforeInit(this.koa)
-    this.koa.use(require("koa-bodyparser")())
+    conf.bodyParserOptions || (conf.bodyParserOptions = {})
+    this.koa.use(require("koa-bodyparser")(conf.bodyParserOptions))
     const { router, middlewares } = Injectable({ folder: resolve(dir, "."), rootFolder: resolve(dir, "."), conf: { ...conf, app: this } })
     middlewares.forEach(mid => {
       this.koa.use(mid)
@@ -50,7 +51,7 @@ class Zsf {
     })
     conf.Decorators && (this.Decorators = conf.Decorators)
   }
-  start (port = 3000, callBack = () => {
+  start(port = 3000, callBack = () => {
     console.log(`\n\x1B[33m\x1B[1mstart on port: ${port}\x1B[0m`)
   }) {
     this.koa.listen(port, () => {

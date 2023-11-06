@@ -91,6 +91,11 @@ const app = new Zsf({
     "./page/index.js",
     "./index.js"
   ],
+  bodyParserOptions: { // koa-bodyparser配置对象
+    jsonLimit: '200mb',
+    formLimit: '200mb',
+    textLimit: '200mb',
+  },
   beforeInit(koaApp){ // 生命周期函数 - 初始化前
     koaApp.use(require("koa2-cors")()) // 跨域设置
     const session = require("koa-session") // session设置
